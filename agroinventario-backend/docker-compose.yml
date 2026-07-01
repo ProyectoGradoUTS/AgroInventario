@@ -1,0 +1,25 @@
+# PostgreSQL para desarrollo local - Fase 1
+# Uso: docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agroinventario-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agroinventario
+      POSTGRES_USER: agro_user
+      POSTGRES_PASSWORD: agro_secret
+      TZ: America/Bogota
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agro_user -d agroinventario"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

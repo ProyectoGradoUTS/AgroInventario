@@ -1,0 +1,14 @@
+# Perfil de producción
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.agroinventario: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: never
