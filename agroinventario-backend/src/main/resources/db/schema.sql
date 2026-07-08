@@ -87,6 +87,23 @@ CREATE INDEX IF NOT EXISTS idx_movimientos_fecha ON movimientos_inventario(fecha
 CREATE INDEX IF NOT EXISTS idx_alertas_producto ON alertas(producto_id);
 
 -- ---------------------------------------------------------------------------
+-- Auditoría básica (Fase 5)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS auditoria (
+    id              BIGSERIAL PRIMARY KEY,
+    entidad         VARCHAR(50) NOT NULL,
+    entidad_id      BIGINT,
+    accion          VARCHAR(50) NOT NULL,
+    detalle         VARCHAR(1000),
+    usuario_id      BIGINT REFERENCES usuarios(id),
+    usuario_email   VARCHAR(150),
+    fecha_evento    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_auditoria_entidad ON auditoria(entidad);
+CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON auditoria(fecha_evento);
+
+-- ---------------------------------------------------------------------------
 -- Datos semilla (roles)
 -- ---------------------------------------------------------------------------
 INSERT INTO roles (nombre) VALUES ('ADMIN'), ('EMPLEADO')

@@ -1,17 +1,18 @@
 package com.agroinventario.application.usecase.inventario;
 
 import com.agroinventario.domain.exception.ResourceNotFoundException;
+import com.agroinventario.domain.model.EntidadAuditoria;
 import com.agroinventario.domain.model.MovimientoInventario;
 import com.agroinventario.domain.model.Producto;
-import com.agroinventario.domain.model.TipoAlerta;
+import com.agroinventario.domain.model.TipoAccionAuditoria;
 import com.agroinventario.domain.model.TipoMovimiento;
+import com.agroinventario.domain.ports.input.alerta.ProcesarAlertasProductoUseCase;
+import com.agroinventario.domain.ports.input.auditoria.RegistrarAuditoriaUseCase;
 import com.agroinventario.domain.ports.input.inventario.RegistrarMovimientoInventarioUseCase;
-import com.agroinventario.domain.ports.output.AlertaRepositoryPort;
 import com.agroinventario.domain.ports.output.CurrentUserPort;
 import com.agroinventario.domain.ports.output.MovimientoInventarioRepositoryPort;
 import com.agroinventario.domain.ports.output.ProductoRepositoryPort;
 import com.agroinventario.domain.ports.output.UsuarioRepositoryPort;
-import com.agroinventario.domain.service.AlertaDomainService;
 import com.agroinventario.domain.service.InventarioDomainService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,26 +26,26 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
     private final ProductoRepositoryPort productoRepository;
     private final MovimientoInventarioRepositoryPort movimientoRepository;
     private final UsuarioRepositoryPort usuarioRepository;
-    private final AlertaRepositoryPort alertaRepository;
     private final CurrentUserPort currentUserPort;
     private final InventarioDomainService inventarioDomainService;
-    private final AlertaDomainService alertaDomainService;
+    private final ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase;
+    private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
 
     public RegistrarMovimientoInventarioUseCaseImpl(
             ProductoRepositoryPort productoRepository,
             MovimientoInventarioRepositoryPort movimientoRepository,
             UsuarioRepositoryPort usuarioRepository,
-            AlertaRepositoryPort alertaRepository,
             CurrentUserPort currentUserPort,
             InventarioDomainService inventarioDomainService,
-            AlertaDomainService alertaDomainService) {
+            ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase,
+            RegistrarAuditoriaUseCase registrarAuditoriaUseCase) {
         this.productoRepository = productoRepository;
         this.movimientoRepository = movimientoRepository;
         this.usuarioRepository = usuarioRepository;
-        this.alertaRepository = alertaRepository;
         this.currentUserPort = currentUserPort;
         this.inventarioDomainService = inventarioDomainService;
-        this.alertaDomainService = alertaDomainService;
+        this.procesarAlertasProductoUseCase = procesarAlertasProductoUseCase;
+        this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
     }
 
     @Override
@@ -79,20 +80,16 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
         );
 
         MovimientoInventario guardado = movimientoRepository.save(movimiento);
-        procesarAlertaStockBajo(productoActualizado);
+        procesarAlertasProductoUseCase.ejecutar(productoActualizado);
+
+        registrarAuditoriaUseCase.ejecutar(
+                EntidadAuditoria.INVENTARIO,
+                guardado.id(),
+                TipoAccionAuditoria.MOVIMIENTO_INVENTARIO,
+                "%s de %d unidad(es) en producto '%s' (id=%d)".formatted(
+                        tipoMovimiento, cantidad, producto.nombre(), producto.id())
+        );
 
         return guardado;
-    }
-
-    private void procesarAlertaStockBajo(Producto producto) {
-        if (!alertaDomainService.requiereAlertaStockBajo(producto)) {
-            return;
-        }
-
-        alertaRepository.findPendienteByProductoAndTipo(producto.id(), TipoAlerta.STOCK_BAJO)
-                .ifPresentOrElse(
-                        existente -> { },
-                        () -> alertaRepository.save(alertaDomainService.crearAlertaStockBajo(producto))
-                );
     }
 }

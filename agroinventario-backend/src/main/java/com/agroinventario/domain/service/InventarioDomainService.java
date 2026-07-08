@@ -1,7 +1,5 @@
 package com.agroinventario.domain.service;
 
-import org.springframework.stereotype.Component;
-
 import com.agroinventario.domain.exception.BusinessRuleException;
 import com.agroinventario.domain.exception.StockInsuficienteException;
 import com.agroinventario.domain.model.Producto;
@@ -10,7 +8,6 @@ import com.agroinventario.domain.model.TipoMovimiento;
 /**
  * Reglas de negocio del inventario (sin dependencias de infraestructura).
  */
-@Component
 public class InventarioDomainService {
 
     public void validarProductoActivo(Producto producto) {

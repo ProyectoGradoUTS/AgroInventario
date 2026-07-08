@@ -1,4 +1,10 @@
 # Perfil de producción
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 spring:
   jpa:
     show-sql: false

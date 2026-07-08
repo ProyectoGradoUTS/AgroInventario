@@ -16,6 +16,9 @@ import com.agroinventario.domain.ports.input.producto.EliminarProductoUseCase;
 import com.agroinventario.domain.ports.input.producto.ListarProductosPaginadoUseCase;
 import com.agroinventario.domain.ports.input.producto.ListarProductosUseCase;
 import com.agroinventario.domain.ports.input.producto.ObtenerProductoUseCase;
+import com.agroinventario.infrastructure.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -40,6 +43,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/productos")
 @Validated
+@Tag(name = "Productos", description = "CRUD de productos, stock y vencimiento")
+@SecurityRequirement(name = OpenApiConfig.bearerSchemeName())
 public class ProductoController {
 
     private final CrearProductoUseCase crearProductoUseCase;

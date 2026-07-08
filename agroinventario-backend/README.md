@@ -56,6 +56,18 @@ mvn spring-boot:run
 
 - Health custom: `GET http://localhost:8080/api/v1/health`
 - Actuator: `GET http://localhost:8080/api/actuator/health`
+- **Swagger UI**: http://localhost:8080/api/swagger-ui.html
+- OpenAPI JSON: `GET http://localhost:8080/api/v3/api-docs`
+
+### 5. Probar la API con Swagger
+
+1. Abre Swagger UI en el enlace anterior.
+2. Ejecuta `POST /v1/auth/login` con el usuario admin de desarrollo.
+3. Copia el `accessToken` de la respuesta.
+4. Pulsa **Authorize** e ingresa: `Bearer <tu_token>`
+5. Prueba el resto de endpoints protegidos.
+
+> En perfil `prod` Swagger está deshabilitado por seguridad.
 
 ## Fases del proyecto
 
@@ -64,9 +76,10 @@ mvn spring-boot:run
 | 1 | ✅ Completada | Proyecto base, Maven, PostgreSQL, estructura hexagonal |
 | 2 | ✅ Completada | Dominio, puertos, casos de uso, adaptadores JPA, API REST |
 | 3 | ✅ Completada | Spring Security + JWT + roles + protección endpoints |
-| 4 | ✅ Actual | Validaciones, excepciones, reglas negocio, paginación |
-| 5 | Pendiente | Alertas, historial, auditoría |
+| 4 | ✅ Completada | Validaciones, excepciones, reglas negocio, paginación |
+| 5 | ✅ Completada | Alertas stock/vencimiento, gestión de estados, auditoría, scheduler |
 
 ## Documentación adicional
 
-Ver `docs/FASE-1-ARQUITECTURA.md` para la explicación detallada paso a paso.
+- `docs/FASE-1-ARQUITECTURA.md` — Base del proyecto
+- `docs/FASE-5-ALERTAS-Y-AUDITORIA.md` — Alertas y auditoría (Fase 5)

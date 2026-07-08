@@ -6,6 +6,9 @@ import com.agroinventario.application.dto.response.MovimientoInventarioResponse;
 import com.agroinventario.application.mapper.MovimientoDtoMapper;
 import com.agroinventario.domain.ports.input.inventario.ListarMovimientosInventarioUseCase;
 import com.agroinventario.domain.ports.input.inventario.RegistrarMovimientoInventarioUseCase;
+import com.agroinventario.infrastructure.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/inventario")
 @Validated
+@Tag(name = "Inventario", description = "Entradas, salidas e historial de movimientos")
+@SecurityRequirement(name = OpenApiConfig.bearerSchemeName())
 public class InventarioController {
 
     private final RegistrarMovimientoInventarioUseCase registrarMovimientoUseCase;

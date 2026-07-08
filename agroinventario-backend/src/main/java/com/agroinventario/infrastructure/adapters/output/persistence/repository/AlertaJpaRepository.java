@@ -19,4 +19,7 @@ public interface AlertaJpaRepository extends JpaRepository<AlertaEntity, Long> {
 
     Optional<AlertaEntity> findByProductoIdAndTipoAlertaAndEstado(
             Long productoId, TipoAlerta tipoAlerta, EstadoAlerta estado);
+
+    @EntityGraph(attributePaths = "producto")
+    Optional<AlertaEntity> findWithProductoById(Long id);
 }

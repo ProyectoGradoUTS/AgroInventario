@@ -4,6 +4,7 @@ import com.agroinventario.domain.model.EstadoGeneral;
 import com.agroinventario.domain.model.PageResult;
 import com.agroinventario.domain.model.Producto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +31,6 @@ public interface ProductoRepositoryPort {
     void deleteById(Long id);
 
     boolean existsById(Long id);
+
+    List<Producto> findActivosConVencimientoHasta(LocalDate fechaLimite);
 }

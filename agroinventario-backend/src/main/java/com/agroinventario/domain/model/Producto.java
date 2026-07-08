@@ -3,6 +3,7 @@ package com.agroinventario.domain.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public record Producto(
         Long id,
@@ -39,5 +40,23 @@ public record Producto(
 
     public boolean estaActivo() {
         return estado == EstadoGeneral.ACTIVO;
+    }
+
+    public boolean tieneFechaVencimiento() {
+        return fechaVencimiento != null;
+    }
+
+    public long diasHastaVencimiento() {
+        if (fechaVencimiento == null) {
+            return Long.MAX_VALUE;
+        }
+        return ChronoUnit.DAYS.between(LocalDate.now(), fechaVencimiento);
+    }
+
+    public boolean vencimientoProximo(int diasAnticipacion) {
+        if (!tieneFechaVencimiento()) {
+            return false;
+        }
+        return diasHastaVencimiento() <= diasAnticipacion;
     }
 }

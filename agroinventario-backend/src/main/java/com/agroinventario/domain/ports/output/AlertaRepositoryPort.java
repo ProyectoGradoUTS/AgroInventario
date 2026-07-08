@@ -15,5 +15,7 @@ public interface AlertaRepositoryPort {
 
     List<Alerta> findByEstado(EstadoAlerta estado);
 
+    Optional<Alerta> findById(Long id);
+
     Optional<Alerta> findPendienteByProductoAndTipo(Long productoId, TipoAlerta tipoAlerta);
 }

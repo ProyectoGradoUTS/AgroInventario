@@ -1,8 +1,12 @@
 package com.agroinventario.application.usecase.producto;
 
 import com.agroinventario.domain.exception.ResourceNotFoundException;
+import com.agroinventario.domain.model.EntidadAuditoria;
 import com.agroinventario.domain.model.EstadoGeneral;
 import com.agroinventario.domain.model.Producto;
+import com.agroinventario.domain.model.TipoAccionAuditoria;
+import com.agroinventario.domain.ports.input.alerta.ProcesarAlertasProductoUseCase;
+import com.agroinventario.domain.ports.input.auditoria.RegistrarAuditoriaUseCase;
 import com.agroinventario.domain.ports.input.producto.CrearProductoUseCase;
 import com.agroinventario.domain.ports.output.CategoriaRepositoryPort;
 import com.agroinventario.domain.ports.output.ProductoRepositoryPort;
@@ -19,12 +23,18 @@ public class CrearProductoUseCaseImpl implements CrearProductoUseCase {
 
     private final ProductoRepositoryPort productoRepository;
     private final CategoriaRepositoryPort categoriaRepository;
+    private final ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase;
+    private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
 
     public CrearProductoUseCaseImpl(
             ProductoRepositoryPort productoRepository,
-            CategoriaRepositoryPort categoriaRepository) {
+            CategoriaRepositoryPort categoriaRepository,
+            ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase,
+            RegistrarAuditoriaUseCase registrarAuditoriaUseCase) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.procesarAlertasProductoUseCase = procesarAlertasProductoUseCase;
+        this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
     }
 
     @Override
@@ -57,6 +67,14 @@ public class CrearProductoUseCaseImpl implements CrearProductoUseCase {
                 LocalDateTime.now()
         );
 
-        return productoRepository.save(producto);
+        Producto guardado = productoRepository.save(producto);
+        procesarAlertasProductoUseCase.ejecutar(guardado);
+        registrarAuditoriaUseCase.ejecutar(
+                EntidadAuditoria.PRODUCTO,
+                guardado.id(),
+                TipoAccionAuditoria.CREAR,
+                "Producto '%s' creado con stock inicial %d".formatted(guardado.nombre(), guardado.stockActual())
+        );
+        return guardado;
     }
 }

@@ -10,6 +10,9 @@ import com.agroinventario.domain.ports.input.categoria.CrearCategoriaUseCase;
 import com.agroinventario.domain.ports.input.categoria.EliminarCategoriaUseCase;
 import com.agroinventario.domain.ports.input.categoria.ListarCategoriasUseCase;
 import com.agroinventario.domain.ports.input.categoria.ObtenerCategoriaUseCase;
+import com.agroinventario.infrastructure.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/categorias")
 @Validated
+@Tag(name = "Categorías", description = "Gestión del catálogo de categorías de productos")
+@SecurityRequirement(name = OpenApiConfig.bearerSchemeName())
 public class CategoriaController {
 
     private final CrearCategoriaUseCase crearCategoriaUseCase;

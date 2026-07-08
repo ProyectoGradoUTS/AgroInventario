@@ -59,6 +59,20 @@ app:
   jwt:
     secret: ${JWT_SECRET:AgroInventarioSecretKeyParaDesarrolloLocalMinimo256Bits1234567890}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  alertas:
+    dias-anticipacion-vencimiento: ${ALERTAS_DIAS_ANTICIPACION:30}
+    cron-vencimiento: ${ALERTAS_CRON_VENCIMIENTO:0 0 6 * * *}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+  show-actuator: false
 
 logging:
   level:

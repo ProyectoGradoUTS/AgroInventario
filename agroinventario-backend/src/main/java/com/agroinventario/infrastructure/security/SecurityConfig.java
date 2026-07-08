@@ -38,6 +38,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/auth/login", "/v1/auth/register").permitAll()
                         .requestMatchers("/v1/health", "/actuator/health").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/v1/auth/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/v1/**").hasAnyRole("ADMIN", "EMPLEADO")
                         .requestMatchers(HttpMethod.POST, "/v1/categorias/**").hasRole("ADMIN")
@@ -48,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/v1/productos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/productos/**").hasRole("ADMIN")
                         .requestMatchers("/v1/inventario/**").hasAnyRole("ADMIN", "EMPLEADO")
+                        .requestMatchers(HttpMethod.PATCH, "/v1/alertas/**").hasAnyRole("ADMIN", "EMPLEADO")
+                        .requestMatchers(HttpMethod.GET, "/v1/auditoria/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

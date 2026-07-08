@@ -47,6 +47,11 @@ public class AlertaPersistenceAdapter implements AlertaRepositoryPort {
     }
 
     @Override
+    public Optional<Alerta> findById(Long id) {
+        return jpaRepository.findWithProductoById(id).map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<Alerta> findPendienteByProductoAndTipo(Long productoId, TipoAlerta tipoAlerta) {
         return jpaRepository.findByProductoIdAndTipoAlertaAndEstado(productoId, tipoAlerta, EstadoAlerta.PENDIENTE)
                 .map(mapper::toDomain);

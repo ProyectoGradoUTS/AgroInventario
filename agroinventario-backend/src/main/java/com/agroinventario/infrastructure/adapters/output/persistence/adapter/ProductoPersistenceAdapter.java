@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,5 +89,15 @@ public class ProductoPersistenceAdapter implements ProductoRepositoryPort {
     @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public List<Producto> findActivosConVencimientoHasta(LocalDate fechaLimite) {
+        return jpaRepository
+                .findByEstadoAndFechaVencimientoNotNullAndFechaVencimientoLessThanEqualOrderByFechaVencimientoAsc(
+                        EstadoGeneral.ACTIVO, fechaLimite)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

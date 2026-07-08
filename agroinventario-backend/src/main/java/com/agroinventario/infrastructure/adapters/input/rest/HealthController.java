@@ -1,6 +1,7 @@
 package com.agroinventario.infrastructure.adapters.input.rest;
 
 import com.agroinventario.infrastructure.config.AppProperties;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/v1/health")
+@Tag(name = "Health", description = "Verificación de estado de la API")
 public class HealthController {
 
     private final AppProperties appProperties;
