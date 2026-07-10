@@ -6,6 +6,7 @@ import com.agroinventario.infrastructure.adapters.output.persistence.mapper.Usua
 import com.agroinventario.infrastructure.adapters.output.persistence.repository.UsuarioJpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -35,6 +36,11 @@ public class UsuarioPersistenceAdapter implements UsuarioRepositoryPort {
     @Override
     public Optional<Usuario> findByEmail(String email) {
         return jpaRepository.findWithRolesByEmail(email).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Usuario> findAllOrderByNombreAsc() {
+        return jpaRepository.findAllByOrderByNombreAsc().stream().map(mapper::toDomain).toList();
     }
 
     @Override

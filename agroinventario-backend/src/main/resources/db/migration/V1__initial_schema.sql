@@ -1,20 +1,13 @@
--- =============================================================================
--- Agro Inventario - Esquema de referencia (LEGACY)
--- El esquema oficial ahora se gestiona con Flyway en:
---   src/main/resources/db/migration/
--- =============================================================================
+-- Flyway V1: esquema inicial PostgreSQL
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ---------------------------------------------------------------------------
--- Seguridad / usuarios
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE roles (
     id          BIGSERIAL PRIMARY KEY,
     nombre      VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS usuarios (
+CREATE TABLE usuarios (
     id              BIGSERIAL PRIMARY KEY,
     nombre          VARCHAR(150) NOT NULL,
     email           VARCHAR(150) NOT NULL UNIQUE,
@@ -24,22 +17,19 @@ CREATE TABLE IF NOT EXISTS usuarios (
     fecha_creacion  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS usuarios_roles (
+CREATE TABLE usuarios_roles (
     usuario_id  BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     rol_id      BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
     PRIMARY KEY (usuario_id, rol_id)
 );
 
--- ---------------------------------------------------------------------------
--- Catálogo de productos
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS categorias (
+CREATE TABLE categorias (
     id          BIGSERIAL PRIMARY KEY,
     nombre      VARCHAR(100) NOT NULL UNIQUE,
     descripcion VARCHAR(500)
 );
 
-CREATE TABLE IF NOT EXISTS productos (
+CREATE TABLE productos (
     id                  BIGSERIAL PRIMARY KEY,
     nombre              VARCHAR(200) NOT NULL,
     descripcion         VARCHAR(1000),
@@ -53,10 +43,7 @@ CREATE TABLE IF NOT EXISTS productos (
     fecha_creacion      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ---------------------------------------------------------------------------
--- Inventario y alertas
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS movimientos_inventario (
+CREATE TABLE movimientos_inventario (
     id              BIGSERIAL PRIMARY KEY,
     producto_id     BIGINT NOT NULL REFERENCES productos(id),
     tipo_movimiento VARCHAR(20) NOT NULL
@@ -67,7 +54,7 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
     fecha_movimiento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS alertas (
+CREATE TABLE alertas (
     id                  BIGSERIAL PRIMARY KEY,
     producto_id         BIGINT NOT NULL REFERENCES productos(id),
     tipo_alerta         VARCHAR(50) NOT NULL,
@@ -77,19 +64,7 @@ CREATE TABLE IF NOT EXISTS alertas (
     fecha_generacion    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ---------------------------------------------------------------------------
--- Índices de rendimiento
--- ---------------------------------------------------------------------------
-CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria_id);
-CREATE INDEX IF NOT EXISTS idx_productos_estado ON productos(estado);
-CREATE INDEX IF NOT EXISTS idx_movimientos_producto ON movimientos_inventario(producto_id);
-CREATE INDEX IF NOT EXISTS idx_movimientos_fecha ON movimientos_inventario(fecha_movimiento);
-CREATE INDEX IF NOT EXISTS idx_alertas_producto ON alertas(producto_id);
-
--- ---------------------------------------------------------------------------
--- Auditoría básica (Fase 5)
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS auditoria (
+CREATE TABLE auditoria (
     id              BIGSERIAL PRIMARY KEY,
     entidad         VARCHAR(50) NOT NULL,
     entidad_id      BIGINT,
@@ -100,11 +75,10 @@ CREATE TABLE IF NOT EXISTS auditoria (
     fecha_evento    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_auditoria_entidad ON auditoria(entidad);
-CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON auditoria(fecha_evento);
-
--- ---------------------------------------------------------------------------
--- Datos semilla (roles)
--- ---------------------------------------------------------------------------
-INSERT INTO roles (nombre) VALUES ('ADMIN'), ('EMPLEADO')
-ON CONFLICT (nombre) DO NOTHING;
+CREATE INDEX idx_productos_categoria ON productos(categoria_id);
+CREATE INDEX idx_productos_estado ON productos(estado);
+CREATE INDEX idx_movimientos_producto ON movimientos_inventario(producto_id);
+CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(fecha_movimiento);
+CREATE INDEX idx_alertas_producto ON alertas(producto_id);
+CREATE INDEX idx_auditoria_entidad ON auditoria(entidad);
+CREATE INDEX idx_auditoria_fecha ON auditoria(fecha_evento);

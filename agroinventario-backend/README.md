@@ -46,7 +46,13 @@ Copy-Item .env.example .env
 
 Desde IntelliJ: ejecutar `AgroInventarioApplication`.
 
-O con Maven (si está instalado):
+O con Maven Wrapper (recomendado):
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+O con Maven instalado globalmente:
 
 ```powershell
 mvn spring-boot:run
@@ -78,8 +84,28 @@ mvn spring-boot:run
 | 3 | ✅ Completada | Spring Security + JWT + roles + protección endpoints |
 | 4 | ✅ Completada | Validaciones, excepciones, reglas negocio, paginación |
 | 5 | ✅ Completada | Alertas stock/vencimiento, gestión de estados, auditoría, scheduler |
+| 6 | ✅ Completada | Flyway, Maven Wrapper, gestión usuarios ADMIN, tests integración |
 
 ## Documentación adicional
 
 - `docs/FASE-1-ARQUITECTURA.md` — Base del proyecto
 - `docs/FASE-5-ALERTAS-Y-AUDITORIA.md` — Alertas y auditoría (Fase 5)
+
+## Migraciones Flyway
+
+El esquema se aplica al iniciar la app (`src/main/resources/db/migration/`).
+
+Si ya tenías Docker con el esquema antiguo:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
+
+Luego ejecuta la aplicación para que Flyway migre la BD.
+
+## Tests
+
+```powershell
+.\mvnw.cmd test
+```

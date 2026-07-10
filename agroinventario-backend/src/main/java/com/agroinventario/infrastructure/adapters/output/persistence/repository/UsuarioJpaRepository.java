@@ -4,9 +4,13 @@ import com.agroinventario.infrastructure.adapters.output.persistence.entity.Usua
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioJpaRepository extends JpaRepository<UsuarioEntity, Long> {
+
+    @EntityGraph(attributePaths = "roles")
+    List<UsuarioEntity> findAllByOrderByNombreAsc();
 
     @EntityGraph(attributePaths = "roles")
     Optional<UsuarioEntity> findWithRolesById(Long id);

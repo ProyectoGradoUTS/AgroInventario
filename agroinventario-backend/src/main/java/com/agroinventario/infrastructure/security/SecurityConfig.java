@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/v1/inventario/**").hasAnyRole("ADMIN", "EMPLEADO")
                         .requestMatchers(HttpMethod.PATCH, "/v1/alertas/**").hasAnyRole("ADMIN", "EMPLEADO")
                         .requestMatchers(HttpMethod.GET, "/v1/auditoria/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

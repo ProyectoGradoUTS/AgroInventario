@@ -12,6 +12,15 @@ public record Usuario(
         LocalDateTime fechaCreacion,
         Set<Rol> roles
 ) {
+
+    public Usuario conEstado(EstadoGeneral nuevoEstado) {
+        return new Usuario(id, nombre, email, password, nuevoEstado, fechaCreacion, roles);
+    }
+
+    public Usuario conRoles(Set<Rol> nuevosRoles) {
+        return new Usuario(id, nombre, email, password, estado, fechaCreacion, nuevosRoles);
+    }
+
     public boolean estaActivo() {
         return estado == EstadoGeneral.ACTIVO;
     }
