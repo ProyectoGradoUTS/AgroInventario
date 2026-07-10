@@ -1,20 +1,7 @@
 package com.agroinventario.infrastructure.adapters.input.rest;
 
-import com.agroinventario.application.dto.request.ActualizarCategoriaRequest;
-import com.agroinventario.application.dto.request.CrearCategoriaRequest;
-import com.agroinventario.application.dto.response.ApiResponse;
-import com.agroinventario.application.dto.response.CategoriaResponse;
-import com.agroinventario.application.mapper.CategoriaDtoMapper;
-import com.agroinventario.domain.ports.input.categoria.ActualizarCategoriaUseCase;
-import com.agroinventario.domain.ports.input.categoria.CrearCategoriaUseCase;
-import com.agroinventario.domain.ports.input.categoria.EliminarCategoriaUseCase;
-import com.agroinventario.domain.ports.input.categoria.ListarCategoriasUseCase;
-import com.agroinventario.domain.ports.input.categoria.ObtenerCategoriaUseCase;
-import com.agroinventario.infrastructure.config.OpenApiConfig;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,13 +14,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.agroinventario.application.dto.request.ActualizarCategoriaRequest;
+import com.agroinventario.application.dto.request.CrearCategoriaRequest;
+import com.agroinventario.application.dto.response.ApiResponse;
+import com.agroinventario.application.dto.response.CategoriaResponse;
+import com.agroinventario.application.mapper.CategoriaDtoMapper;
+import com.agroinventario.domain.ports.input.categoria.ActualizarCategoriaUseCase;
+import com.agroinventario.domain.ports.input.categoria.CrearCategoriaUseCase;
+import com.agroinventario.domain.ports.input.categoria.EliminarCategoriaUseCase;
+import com.agroinventario.domain.ports.input.categoria.ListarCategoriasUseCase;
+import com.agroinventario.domain.ports.input.categoria.ObtenerCategoriaUseCase;
+import com.agroinventario.infrastructure.config.OpenApiConfig;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/v1/categorias")
 @Validated
 @Tag(name = "Categorías", description = "Gestión del catálogo de categorías de productos")
-@SecurityRequirement(name = OpenApiConfig.bearerSchemeName())
+@SecurityRequirement(name = OpenApiConfig.BEARER_SCHEME)
 public class CategoriaController {
 
     private final CrearCategoriaUseCase crearCategoriaUseCase;

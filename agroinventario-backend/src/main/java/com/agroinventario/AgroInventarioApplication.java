@@ -6,8 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Punto de entrada de la aplicación.
  * <p>
- * {@code @SpringBootApplication} habilita autoconfiguración y escaneo de componentes
- * en {@code com.agroinventario} y todos sus subpaquetes (domain, application, infrastructure).
+ * {@code @SpringBootApplication} habilita autoconfiguración y escaneo de
+ * componentes
+ * en {@code com.agroinventario} y todos sus subpaquetes (domain, application,
+ * infrastructure).
  * </p>
  */
 @SpringBootApplication

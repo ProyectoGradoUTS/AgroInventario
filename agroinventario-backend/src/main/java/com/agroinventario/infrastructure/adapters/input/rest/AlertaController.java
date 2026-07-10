@@ -28,7 +28,7 @@ import java.util.List;
 @RequestMapping("/v1/alertas")
 @Validated
 @Tag(name = "Alertas", description = "Alertas de stock bajo y vencimiento próximo")
-@SecurityRequirement(name = OpenApiConfig.bearerSchemeName())
+@SecurityRequirement(name = OpenApiConfig.BEARER_SCHEME)
 public class AlertaController {
 
     private final ListarAlertasUseCase listarAlertasUseCase;
