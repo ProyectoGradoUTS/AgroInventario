@@ -1,7 +1,10 @@
 package com.agroinventario.infrastructure.adapters.output.persistence.entity;
 
+import java.time.LocalDateTime;
+
 import com.agroinventario.domain.model.EstadoAlerta;
 import com.agroinventario.domain.model.TipoAlerta;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,8 +18,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "alertas")
