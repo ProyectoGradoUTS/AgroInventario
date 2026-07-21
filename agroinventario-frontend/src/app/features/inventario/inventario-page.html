@@ -1,0 +1,142 @@
+<app-page-header
+  title="Inventario"
+  subtitle="Registrar entradas y salidas · POST /v1/inventario/productos/{id}/movimientos"
+  icon="warehouse"
+>
+  <a mat-stroked-button routerLink="/app/movimientos">
+    <mat-icon>history</mat-icon>
+    Ver historial
+  </a>
+</app-page-header>
+
+@if (errorMessage(); as message) {
+  <div class="page-error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ message }}</span>
+  </div>
+}
+
+<div class="inventario-grid">
+  <mat-card class="panel">
+    <mat-card-header>
+      <mat-card-title>Nuevo movimiento</mat-card-title>
+      <mat-card-subtitle>
+        El usuario se toma del JWT. No se envía usuarioId en el body.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loadingProductos()) {
+        <div class="panel-loading">
+          <mat-spinner diameter="32" />
+          <span>Cargando productos activos…</span>
+        </div>
+      } @else if (!productos().length) {
+        <div class="panel-empty">
+          <p>No hay productos activos. Cree uno en el módulo Productos.</p>
+          <a mat-stroked-button routerLink="/app/productos">Ir a productos</a>
+        </div>
+      } @else {
+        <form class="mov-form" [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline">
+            <mat-label>Producto</mat-label>
+            <mat-select formControlName="productoId">
+              @for (p of productos(); track p.id) {
+                <mat-option [value]="p.id">
+                  {{ p.nombre }} (stock: {{ p.stockActual }})
+                </mat-option>
+              }
+            </mat-select>
+            @if (form.controls.productoId.hasError('required') && form.controls.productoId.touched) {
+              <mat-error>Seleccione un producto</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="mov-form__row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipoMovimiento">
+                @for (tipo of tipos; track tipo) {
+                  <mat-option [value]="tipo">{{ tipo }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cantidad</mat-label>
+              <input matInput type="number" formControlName="cantidad" min="1" step="1" />
+              @if (form.controls.cantidad.hasError('min') && form.controls.cantidad.touched) {
+                <mat-error>Mínimo 1</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput formControlName="descripcion" rows="2" maxlength="500"></textarea>
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="mov-form__submit"
+            [disabled]="submitting()"
+          >
+            @if (submitting()) {
+              <ng-container>
+                <mat-spinner diameter="20" />
+                <span>Registrando…</span>
+              </ng-container>
+            } @else {
+              Registrar movimiento
+            }
+          </button>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="panel panel--info">
+    <mat-card-header>
+      <mat-card-title>Resumen del producto</mat-card-title>
+      <mat-card-subtitle>Datos actuales desde GET /v1/productos</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (productoSeleccionado(); as producto) {
+        <dl class="producto-meta">
+          <div>
+            <dt>Nombre</dt>
+            <dd>{{ producto.nombre }}</dd>
+          </div>
+          <div>
+            <dt>Categoría</dt>
+            <dd>{{ producto.categoriaNombre }}</dd>
+          </div>
+          <div>
+            <dt>Precio</dt>
+            <dd>{{ producto.precio | currency: 'COP':'symbol-narrow':'1.0-0' }}</dd>
+          </div>
+          <div>
+            <dt>Stock actual</dt>
+            <dd [class.text-warn]="producto.stockBajo">{{ producto.stockActual }}</dd>
+          </div>
+          <div>
+            <dt>Stock mínimo</dt>
+            <dd>{{ producto.stockMinimo }}</dd>
+          </div>
+          <div>
+            <dt>Estado stock</dt>
+            <dd>
+              <span class="chip" [class.chip--warn]="producto.stockBajo" [class.chip--ok]="!producto.stockBajo">
+                {{ producto.stockBajo ? 'STOCK BAJO' : 'OK' }}
+              </span>
+            </dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="hint">Seleccione un producto para ver su stock y categoría.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

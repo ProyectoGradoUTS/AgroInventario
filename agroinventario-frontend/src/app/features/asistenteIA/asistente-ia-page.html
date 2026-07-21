@@ -1,0 +1,121 @@
+<app-page-header
+  title="Asistente IA"
+  subtitle="Shell preparado para consumir la API cuando el backend la publique"
+  icon="smart_toy"
+/>
+
+<div class="asistente-layout">
+  <mat-card class="status-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>info</mat-icon>
+      <mat-card-title>Estado de integración</mat-card-title>
+      <mat-card-subtitle>Sin llamadas inventadas ni datos ficticios de negocio</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <dl class="status-list">
+        <div>
+          <dt>Feature flag</dt>
+          <dd>
+            <span class="chip" [class.chip--ok]="habilitado" [class.chip--warn]="!habilitado">
+              {{ habilitado ? 'ENABLED' : 'DISABLED' }}
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt>Path provisional</dt>
+          <dd><code>{{ basePath }}</code></dd>
+        </div>
+        <div>
+          <dt>Servicio</dt>
+          <dd><code>AsistenteIaService</code></dd>
+        </div>
+        <div>
+          <dt>Acción al habilitar</dt>
+          <dd>
+            1) Publicar DTO/endpoints en Spring · 2) Alinear modelos TS · 3) Activar
+            <code>asistenteIa.enabled</code>
+          </dd>
+        </div>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="chat-card">
+    <mat-card-header>
+      <mat-card-title>Conversación</mat-card-title>
+      <mat-card-subtitle>
+        @if (habilitado) {
+          Listo para POST {{ basePath }}/consultar
+        } @else {
+          Entrada deshabilitada hasta que exista el backend
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="chat-thread" role="log" aria-live="polite">
+        @for (msg of mensajes(); track msg.id) {
+          <article class="bubble" [attr.data-rol]="msg.rol">
+            <header>
+              <strong>
+                @switch (msg.rol) {
+                  @case ('usuario') {
+                    Usted
+                  }
+                  @case ('asistente') {
+                    Asistente
+                  }
+                  @default {
+                    Sistema
+                  }
+                }
+              </strong>
+              <time>{{ msg.fecha | date: 'HH:mm:ss' }}</time>
+            </header>
+            <p>{{ msg.texto }}</p>
+          </article>
+        }
+      </div>
+
+      <div class="sugerencias">
+        @for (item of sugerencias; track item) {
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!habilitado"
+            (click)="usarSugerencia(item)"
+          >
+            {{ item }}
+          </button>
+        }
+      </div>
+
+      <form class="chat-form" [formGroup]="form" (ngSubmit)="enviar()">
+        <mat-form-field appearance="outline" class="chat-form__field">
+          <mat-label>Escriba su consulta</mat-label>
+          <textarea
+            matInput
+            formControlName="pregunta"
+            rows="2"
+            maxlength="1000"
+            [placeholder]="
+              habilitado
+                ? 'Ej.: ¿Cuáles productos requieren reposición?'
+                : 'Disponible cuando el backend publique el asistente'
+            "
+          ></textarea>
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="!habilitado || enviando() || form.invalid"
+        >
+          <mat-icon>send</mat-icon>
+          Enviar
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

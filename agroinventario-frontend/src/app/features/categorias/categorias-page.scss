@@ -1,0 +1,77 @@
+.filters-card,
+.table-card {
+  border: 1px solid var(--agro-border);
+  box-shadow: none;
+  background: #fff;
+  margin-bottom: 1rem;
+}
+
+.search-field {
+  width: min(420px, 100%);
+  margin-top: 0.25rem;
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--agro-danger);
+  border: 1px solid #f5c2c0;
+}
+
+.table-loading,
+.table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 220px;
+  color: var(--agro-text-muted);
+  text-align: center;
+
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.7;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+
+  th {
+    font-size: 0.75rem;
+    color: var(--agro-text-muted);
+    font-weight: 600;
+  }
+}
+
+.cell-main {
+  font-weight: 500;
+}
+
+.cell-sub {
+  font-size: 0.75rem;
+  color: var(--agro-text-muted);
+}
+
+.col-actions {
+  width: 72px;
+  text-align: right;
+}
+
+.table-footer {
+  padding: 0.75rem 0.25rem 0.25rem;
+  font-size: 0.8rem;
+  color: var(--agro-text-muted);
+}

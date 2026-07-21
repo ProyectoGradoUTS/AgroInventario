@@ -1,0 +1,58 @@
+// Agro Inventario — tema ERP (Material 3 + marca)
+@use '@angular/material' as mat;
+
+:root {
+  --agro-primary: #2e7d32;
+  --agro-primary-dark: #1b5e20;
+  --agro-secondary: #1565c0;
+  --agro-bg: #f5f7fa;
+  --agro-surface: #ffffff;
+  --agro-border: #e2e8f0;
+  --agro-text: #1e293b;
+  --agro-text-muted: #64748b;
+  --agro-sidebar-width: 260px;
+  --agro-sidebar-collapsed: 72px;
+  --agro-navbar-height: 64px;
+  --agro-danger: #c62828;
+  --agro-warning: #ef6c00;
+}
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$green-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color-scheme: light;
+  background-color: var(--agro-bg);
+  color: var(--agro-text);
+  font-family: Roboto, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
