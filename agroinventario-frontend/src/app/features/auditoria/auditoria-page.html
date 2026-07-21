@@ -1,0 +1,111 @@
+<app-page-header
+  title="Auditoría"
+  subtitle="Trazabilidad de operaciones · GET /v1/auditoria · solo ADMIN"
+  icon="history"
+>
+  <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
+    <mat-icon>refresh</mat-icon>
+    Actualizar
+  </button>
+</app-page-header>
+
+<mat-card class="filters-card">
+  <form class="filters" [formGroup]="filters" (ngSubmit)="buscar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Entidad</mat-label>
+      <mat-select formControlName="entidad">
+        <mat-option value="">Todas</mat-option>
+        @for (entidad of entidades; track entidad) {
+          @if (entidad) {
+            <mat-option [value]="entidad">{{ entidad }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="filters__actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading()">Filtrar</button>
+      <button mat-button type="button" (click)="limpiar()" [disabled]="loading()">Limpiar</button>
+    </div>
+  </form>
+</mat-card>
+
+@if (errorMessage(); as message) {
+  <div class="page-error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ message }}</span>
+    <button mat-button type="button" (click)="cargar()">Reintentar</button>
+  </div>
+}
+
+<mat-card class="table-card">
+  @if (loading()) {
+    <div class="table-loading">
+      <mat-spinner diameter="36" />
+      <span>Cargando auditoría…</span>
+    </div>
+  } @else if (!(pageData()?.content?.length)) {
+    <div class="table-empty">
+      <mat-icon>history</mat-icon>
+      <p>No hay eventos de auditoría con los filtros actuales.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table mat-table [dataSource]="pageData()!.content" class="data-table">
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.fechaEvento | date: 'dd/MM/yyyy HH:mm:ss' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="entidad">
+          <th mat-header-cell *matHeaderCellDef>Entidad</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="chip chip--neutral">{{ row.entidad }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="entidadId">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let row">{{ row.entidadId ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef>Acción</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="chip chip--info">{{ row.accion }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef>Usuario</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.usuarioEmail || 'Sistema / N/D' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="detalle">
+          <th mat-header-cell *matHeaderCellDef>Detalle</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="detalle" [matTooltip]="row.detalle || ''">
+              {{ row.detalle || '—' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="pageData()!.totalElements"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
+  }
+</mat-card>

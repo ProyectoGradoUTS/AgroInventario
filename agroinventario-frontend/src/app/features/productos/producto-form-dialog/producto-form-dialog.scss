@@ -1,0 +1,53 @@
+.form-error {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--agro-danger);
+  border: 1px solid #f5c2c0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+.form-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 120px;
+  color: var(--agro-text-muted);
+}
+
+.producto-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: min(520px, 86vw);
+  padding-top: 0.25rem;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+mat-dialog-actions button mat-spinner {
+  display: inline-block;
+}
+
+@media (max-width: 640px) {
+  .producto-form__row {
+    grid-template-columns: 1fr;
+  }
+}

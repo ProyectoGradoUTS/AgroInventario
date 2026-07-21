@@ -1,0 +1,138 @@
+.filters-card,
+.table-card {
+  border: 1px solid var(--agro-border);
+  box-shadow: none;
+  background: #fff;
+  margin-bottom: 1rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.4fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding-top: 0.35rem;
+
+  &__actions {
+    display: flex;
+    gap: 0.35rem;
+    padding-top: 0.35rem;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--agro-danger);
+  border: 1px solid #f5c2c0;
+}
+
+.table-loading,
+.table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 220px;
+  color: var(--agro-text-muted);
+  text-align: center;
+
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.7;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+
+  th {
+    font-size: 0.75rem;
+    color: var(--agro-text-muted);
+    font-weight: 600;
+  }
+}
+
+.cell-main {
+  font-weight: 500;
+}
+
+.cell-sub {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--agro-text-muted);
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.col-actions {
+  width: 72px;
+  text-align: right;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+
+  &--ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+    margin-left: 0;
+  }
+
+  &--warn {
+    background: #fff3e0;
+    color: #ef6c00;
+  }
+
+  &--neutral {
+    background: #f1f5f9;
+    color: #64748b;
+    margin-left: 0;
+  }
+}
+
+.text-warn {
+  color: var(--agro-warning);
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+
+    &__actions {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}

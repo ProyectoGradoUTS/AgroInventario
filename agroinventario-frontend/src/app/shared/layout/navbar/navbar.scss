@@ -1,0 +1,51 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #ffffff !important;
+  color: var(--agro-text) !important;
+  border-bottom: 1px solid var(--agro-border);
+  height: var(--agro-navbar-height);
+  box-shadow: 0 1px 0 rgba(21, 101, 192, 0.04);
+
+  &__context {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.25rem;
+    line-height: 1.2;
+  }
+
+  &__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  &__subtitle {
+    font-size: 0.7rem;
+    color: var(--agro-text-muted);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__user-name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .navbar__subtitle,
+  .navbar__user-name {
+    display: none;
+  }
+}

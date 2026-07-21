@@ -1,0 +1,58 @@
+.shell {
+  --sidebar-current: var(--agro-sidebar-width);
+  display: grid;
+  grid-template-columns: var(--sidebar-current) 1fr;
+  min-height: 100vh;
+  background: var(--agro-bg);
+
+  &--collapsed {
+    --sidebar-current: var(--agro-sidebar-collapsed);
+  }
+
+  &--mobile {
+    grid-template-columns: 1fr;
+
+    .shell__sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 40;
+      transform: translateX(-105%);
+      transition: transform 0.2s ease;
+      box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18);
+
+      &.is-open {
+        transform: translateX(0);
+      }
+    }
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: 0;
+    background: rgba(15, 23, 42, 0.45);
+    cursor: pointer;
+  }
+
+  &__sidebar {
+    min-height: 100vh;
+  }
+
+  &__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__content {
+    flex: 1;
+    padding: 1.25rem 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell__content {
+    padding: 1rem;
+  }
+}

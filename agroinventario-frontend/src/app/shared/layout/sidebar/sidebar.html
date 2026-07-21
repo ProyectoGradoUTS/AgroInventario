@@ -1,0 +1,33 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
+  <div class="sidebar__brand">
+    <div class="sidebar__logo">AI</div>
+    @if (!collapsed) {
+      <div class="sidebar__titles">
+        <span class="sidebar__name">Agro Inventario</span>
+        <span class="sidebar__tag">Gestión agropecuaria</span>
+      </div>
+    }
+  </div>
+
+  <nav class="sidebar__nav" aria-label="Navegación principal">
+    <mat-nav-list>
+      @for (item of items(); track item.route) {
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          (click)="navigate.emit()"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          @if (!collapsed) {
+            <span matListItemTitle>{{ item.label }}</span>
+          }
+        </a>
+      }
+    </mat-nav-list>
+  </nav>
+
+  @if (!collapsed) {
+    <footer class="sidebar__footer">ERP · Inventario inteligente</footer>
+  }
+</aside>
