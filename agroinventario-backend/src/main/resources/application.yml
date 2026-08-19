@@ -84,5 +84,6 @@ logging:
     root: INFO
     com.agroinventario: DEBUG
     org.hibernate.SQL: ${JPA_SHOW_SQL:false}
+    org.springframework.security: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

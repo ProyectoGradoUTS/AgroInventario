@@ -1,0 +1,18 @@
+Para iniciar el backend
+
+cd agroinventario-backend
+    (tener la aplicacion docker desktop abierta)
+    docker compose up -d
+    Respuesta de la terminal
+    [+] up 1/1
+    ✔ Container agroinventario-postgres Running    
+
+En la misma carpeta del backend correr lo siguente 
+    mvn spring-boot:run
+
+Levantar el frontend
+    Abrir otra terminal y entrar a la carpeta
+    cd agroinventario-frontend
+    Luego ejecutar npm start
+    se correra todo en esta ruta 
+    http://localhost:4200
