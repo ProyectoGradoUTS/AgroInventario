@@ -1,0 +1,118 @@
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(ellipse at top left, rgba(46, 125, 50, 0.18), transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(21, 101, 192, 0.14), transparent 45%),
+    linear-gradient(180deg, #eef5f0 0%, var(--agro-bg) 45%, #e8eef6 100%);
+
+  &__panel {
+    width: min(440px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__brand {
+    text-align: center;
+    color: var(--agro-text);
+  }
+
+  &__logo {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 0.75rem;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--agro-primary), #1b5e20);
+    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.28);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    color: var(--agro-text-muted);
+    line-height: 1.5;
+  }
+
+  &__card {
+    border: 1px solid var(--agro-border);
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+    background: var(--agro-surface);
+  }
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    background: rgba(46, 125, 50, 0.12);
+    color: var(--agro-primary);
+    border-radius: 50%;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1rem;
+
+  &__field {
+    width: 100%;
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 8px;
+    background: #fdecea;
+    color: var(--agro-danger);
+    border: 1px solid #f5c2c0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  &__submit {
+    margin-top: 0.5rem;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    font-weight: 600;
+    background-color: var(--agro-primary) !important;
+    color: #fff !important;
+  }
+}
+
+:host ::ng-deep {
+  .login-form__submit .mdc-button__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .login-form__submit mat-spinner circle {
+    stroke: #fff;
+  }
+}

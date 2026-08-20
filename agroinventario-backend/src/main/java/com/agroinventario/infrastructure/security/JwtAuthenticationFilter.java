@@ -33,23 +33,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        System.out.println("========== JWT FILTER ==========");
+        System.out.println("URI: " + request.getRequestURI());
+
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        System.out.println("HEADER: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("NO HAY TOKEN");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
 
-        if (SecurityContextHolder.getContext().getAuthentication() == null && tokenProvider.isTokenValid(token)) {
+        System.out.println("TOKEN VALIDO: " + tokenProvider.isTokenValid(token));
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null
+                && tokenProvider.isTokenValid(token)) {
+
             String email = tokenProvider.extractEmail(token);
+            System.out.println("EMAIL: " + email);
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
+            System.out.println("AUTHORITIES: " + userDetails.getAuthorities());
+
             var authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities());
+
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            System.out.println("AUTENTICADO");
         }
 
         filterChain.doFilter(request, response);

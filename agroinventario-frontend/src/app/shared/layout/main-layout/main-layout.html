@@ -1,0 +1,19 @@
+<div class="shell" [class.shell--collapsed]="collapsed()" [class.shell--mobile]="isMobile()">
+  @if (isMobile() && mobileOpen()) {
+    <button class="shell__backdrop" type="button" aria-label="Cerrar menú" (click)="closeMobile()"></button>
+  }
+
+  <div class="shell__sidebar" [class.is-open]="mobileOpen()">
+    <app-sidebar
+      [collapsed]="!isMobile() && collapsed()"
+      (navigate)="closeMobile()"
+    />
+  </div>
+
+  <div class="shell__main">
+    <app-navbar (toggleSidebar)="toggleSidebar()" />
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

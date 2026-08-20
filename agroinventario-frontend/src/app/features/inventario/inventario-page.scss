@@ -1,0 +1,132 @@
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--agro-danger);
+  border: 1px solid #f5c2c0;
+}
+
+.inventario-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
+}
+
+.panel {
+  border: 1px solid var(--agro-border);
+  box-shadow: none;
+  background: #fff;
+}
+
+.panel-loading,
+.panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 180px;
+  color: var(--agro-text-muted);
+  text-align: center;
+}
+
+.mov-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: 0.75rem;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  &__submit {
+    align-self: flex-start;
+    margin-top: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 42px;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.producto-meta {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0.75rem 0 0;
+
+  div {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  dt {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--agro-text-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.hint {
+  margin: 1rem 0 0;
+  color: var(--agro-text-muted);
+}
+
+.chip {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  &--ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &--warn {
+    background: #fff3e0;
+    color: #ef6c00;
+  }
+}
+
+.text-warn {
+  color: var(--agro-warning);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .inventario-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .mov-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .producto-meta div {
+    grid-template-columns: 1fr;
+  }
+}

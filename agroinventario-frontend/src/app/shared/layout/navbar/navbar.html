@@ -1,0 +1,30 @@
+<mat-toolbar class="navbar">
+  <button mat-icon-button type="button" aria-label="Menú" (click)="toggleSidebar.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div class="navbar__context">
+    <span class="navbar__title">Panel operativo</span>
+    <span class="navbar__subtitle">Inventario agropecuario</span>
+  </div>
+
+  <span class="navbar__spacer"></span>
+
+  <button mat-button [matMenuTriggerFor]="userMenu" class="navbar__user">
+    <mat-icon>account_circle</mat-icon>
+    <span class="navbar__user-name">{{ user()?.nombre || 'Usuario' }}</span>
+    <mat-icon>expand_more</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item routerLink="/app/perfil">
+      <mat-icon>person</mat-icon>
+      <span>Perfil</span>
+    </button>
+    <mat-divider />
+    <button mat-menu-item type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar sesión</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
