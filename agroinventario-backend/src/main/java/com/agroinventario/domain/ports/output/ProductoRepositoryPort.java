@@ -14,6 +14,8 @@ public interface ProductoRepositoryPort {
 
     Optional<Producto> findById(Long id);
 
+    Optional<Producto> findByNombre(String nombre); // <-- Agrega esta línea si no existe
+
     List<Producto> findAll();
 
     List<Producto> findByEstado(EstadoGeneral estado);
@@ -23,8 +25,7 @@ public interface ProductoRepositoryPort {
             Long categoriaId,
             String nombre,
             int page,
-            int size
-    );
+            int size);
 
     long countByCategoriaId(Long categoriaId);
 

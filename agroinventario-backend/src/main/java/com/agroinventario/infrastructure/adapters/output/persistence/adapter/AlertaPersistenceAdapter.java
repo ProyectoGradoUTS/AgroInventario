@@ -1,5 +1,10 @@
 package com.agroinventario.infrastructure.adapters.output.persistence.adapter;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import com.agroinventario.domain.model.Alerta;
 import com.agroinventario.domain.model.EstadoAlerta;
 import com.agroinventario.domain.model.TipoAlerta;
@@ -7,10 +12,6 @@ import com.agroinventario.domain.ports.output.AlertaRepositoryPort;
 import com.agroinventario.infrastructure.adapters.output.persistence.mapper.AlertaEntityMapper;
 import com.agroinventario.infrastructure.adapters.output.persistence.repository.AlertaJpaRepository;
 import com.agroinventario.infrastructure.adapters.output.persistence.repository.ProductoJpaRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 @Component
 public class AlertaPersistenceAdapter implements AlertaRepositoryPort {
@@ -33,7 +34,7 @@ public class AlertaPersistenceAdapter implements AlertaRepositoryPort {
         var producto = productoJpaRepository.findById(alerta.productoId())
                 .orElseThrow(() -> new IllegalStateException("Producto no encontrado"));
         var saved = jpaRepository.save(mapper.toEntity(alerta, producto));
-        return jpaRepository.findById(saved.getId()).map(mapper::toDomain).orElseThrow();
+        return jpaRepository.findWithProductoById(saved.getId()).map(mapper::toDomain).orElseThrow();
     }
 
     @Override

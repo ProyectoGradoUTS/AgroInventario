@@ -64,6 +64,12 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Envío de correos electrónicos (alertas de vencimiento) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Seguridad + JWT (Fase 3) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -36,17 +36,22 @@ public class ActualizarEstadoAlertaUseCaseImpl implements ActualizarEstadoAlerta
                     "No se puede cambiar la alerta de %s a %s".formatted(alerta.estado(), nuevoEstado));
         }
 
+        // Si el estado es el mismo, retornar sin hacer nada pero sin error
         if (alerta.estado() == nuevoEstado) {
             return alerta;
         }
 
-        Alerta actualizada = alertaRepository.save(alerta.conEstado(nuevoEstado));
+        // Guardar el cambio de estado
+        Alerta actualizada = alerta.conEstado(nuevoEstado);
+        Alerta guardada = alertaRepository.save(actualizada);
+
+        // Registrar en auditoría
         registrarAuditoriaUseCase.ejecutar(
                 EntidadAuditoria.ALERTA,
-                actualizada.id(),
+                guardada.id(),
                 TipoAccionAuditoria.ALERTA_ACTUALIZADA,
-                "Estado de alerta cambiado a %s".formatted(nuevoEstado)
-        );
-        return actualizada;
+                "Estado de alerta cambiado a %s".formatted(nuevoEstado));
+
+        return guardada;
     }
 }

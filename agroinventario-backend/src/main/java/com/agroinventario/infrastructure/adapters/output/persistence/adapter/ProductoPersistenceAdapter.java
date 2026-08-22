@@ -50,6 +50,11 @@ public class ProductoPersistenceAdapter implements ProductoRepositoryPort {
     }
 
     @Override
+    public Optional<Producto> findByNombre(String nombre) {
+        return jpaRepository.findByNombreIgnoreCase(nombre).map(mapper::toDomain);
+    }
+
+    @Override
     public List<Producto> findAll() {
         return jpaRepository.findAllByOrderByNombreAsc().stream().map(mapper::toDomain).toList();
     }
@@ -62,8 +67,8 @@ public class ProductoPersistenceAdapter implements ProductoRepositoryPort {
     @Override
     public PageResult<Producto> findPaginado(
             EstadoGeneral estado, Long categoriaId, String nombre, int page, int size) {
-        Specification<com.agroinventario.infrastructure.adapters.output.persistence.entity.ProductoEntity> spec =
-                ProductoSpecifications.conFiltros(estado, categoriaId, nombre);
+        Specification<com.agroinventario.infrastructure.adapters.output.persistence.entity.ProductoEntity> spec = ProductoSpecifications
+                .conFiltros(estado, categoriaId, nombre);
         var pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
         var result = jpaRepository.findAll(spec, pageable);
 
@@ -72,8 +77,7 @@ public class ProductoPersistenceAdapter implements ProductoRepositoryPort {
                 result.getNumber(),
                 result.getSize(),
                 result.getTotalElements(),
-                result.getTotalPages()
-        );
+                result.getTotalPages());
     }
 
     @Override

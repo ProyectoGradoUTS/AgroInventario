@@ -1,5 +1,6 @@
 package com.agroinventario.application.usecase.producto;
 
+import com.agroinventario.domain.exception.BusinessRuleException;
 import com.agroinventario.domain.exception.ResourceNotFoundException;
 import com.agroinventario.domain.model.EntidadAuditoria;
 import com.agroinventario.domain.model.EstadoGeneral;
@@ -21,60 +22,64 @@ import java.time.LocalDateTime;
 @Transactional
 public class CrearProductoUseCaseImpl implements CrearProductoUseCase {
 
-    private final ProductoRepositoryPort productoRepository;
-    private final CategoriaRepositoryPort categoriaRepository;
-    private final ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase;
-    private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
+        private final ProductoRepositoryPort productoRepository;
+        private final CategoriaRepositoryPort categoriaRepository;
+        private final ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase;
+        private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
 
-    public CrearProductoUseCaseImpl(
-            ProductoRepositoryPort productoRepository,
-            CategoriaRepositoryPort categoriaRepository,
-            ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase,
-            RegistrarAuditoriaUseCase registrarAuditoriaUseCase) {
-        this.productoRepository = productoRepository;
-        this.categoriaRepository = categoriaRepository;
-        this.procesarAlertasProductoUseCase = procesarAlertasProductoUseCase;
-        this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
-    }
+        public CrearProductoUseCaseImpl(
+                        ProductoRepositoryPort productoRepository,
+                        CategoriaRepositoryPort categoriaRepository,
+                        ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase,
+                        RegistrarAuditoriaUseCase registrarAuditoriaUseCase) {
+                this.productoRepository = productoRepository;
+                this.categoriaRepository = categoriaRepository;
+                this.procesarAlertasProductoUseCase = procesarAlertasProductoUseCase;
+                this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
+        }
 
-    @Override
-    public Producto ejecutar(
-            String nombre,
-            String descripcion,
-            BigDecimal precio,
-            int stockActual,
-            int stockMinimo,
-            LocalDate fechaVencimiento,
-            Long categoriaId,
-            EstadoGeneral estado) {
+        @Override
+        public Producto ejecutar(
+                        String nombre,
+                        String descripcion,
+                        BigDecimal precio,
+                        int stockActual,
+                        int stockMinimo,
+                        LocalDate fechaVencimiento,
+                        Long categoriaId,
+                        EstadoGeneral estado) {
 
-        var categoria = categoriaRepository.findById(categoriaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría", categoriaId));
+                var categoria = categoriaRepository.findById(categoriaId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Categoría", categoriaId));
 
-        EstadoGeneral estadoFinal = estado != null ? estado : EstadoGeneral.ACTIVO;
+                if (nombre != null && productoRepository.findByNombre(nombre).isPresent()) {
+                        throw new BusinessRuleException(
+                                        "Ya existe un producto con el nombre '%s'".formatted(nombre));
+                }
 
-        Producto producto = new Producto(
-                null,
-                nombre,
-                descripcion,
-                precio,
-                stockActual,
-                stockMinimo,
-                fechaVencimiento,
-                categoria.id(),
-                categoria.nombre(),
-                estadoFinal,
-                LocalDateTime.now()
-        );
+                EstadoGeneral estadoFinal = estado != null ? estado : EstadoGeneral.ACTIVO;
 
-        Producto guardado = productoRepository.save(producto);
-        procesarAlertasProductoUseCase.ejecutar(guardado);
-        registrarAuditoriaUseCase.ejecutar(
-                EntidadAuditoria.PRODUCTO,
-                guardado.id(),
-                TipoAccionAuditoria.CREAR,
-                "Producto '%s' creado con stock inicial %d".formatted(guardado.nombre(), guardado.stockActual())
-        );
-        return guardado;
-    }
+                Producto producto = new Producto(
+                                null,
+                                nombre,
+                                descripcion,
+                                precio,
+                                stockActual,
+                                stockMinimo,
+                                fechaVencimiento,
+                                categoria.id(),
+                                categoria.nombre(),
+                                estadoFinal,
+                                LocalDateTime.now());
+
+                Producto guardado = productoRepository.save(producto);
+                procesarAlertasProductoUseCase.ejecutar(guardado);
+                registrarAuditoriaUseCase.ejecutar(
+                                EntidadAuditoria.PRODUCTO,
+                                guardado.id(),
+                                TipoAccionAuditoria.CREAR,
+                                "Producto '%s' creado con stock inicial %d".formatted(guardado.nombre(),
+                                                guardado.stockActual()));
+                return guardado;
+        }
 }

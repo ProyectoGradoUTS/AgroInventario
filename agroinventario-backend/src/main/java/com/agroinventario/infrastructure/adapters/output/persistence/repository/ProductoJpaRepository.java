@@ -10,7 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductoJpaRepository extends JpaRepository<ProductoEntity, Long>, JpaSpecificationExecutor<ProductoEntity> {
+public interface ProductoJpaRepository
+        extends JpaRepository<ProductoEntity, Long>, JpaSpecificationExecutor<ProductoEntity> {
 
     @EntityGraph(attributePaths = "categoria")
     List<ProductoEntity> findAllByOrderByNombreAsc();
@@ -20,6 +21,9 @@ public interface ProductoJpaRepository extends JpaRepository<ProductoEntity, Lon
 
     @EntityGraph(attributePaths = "categoria")
     Optional<ProductoEntity> findWithCategoriaById(Long id);
+
+    @EntityGraph(attributePaths = "categoria")
+    Optional<ProductoEntity> findByNombreIgnoreCase(String nombre);
 
     long countByCategoriaId(Long categoriaId);
 
