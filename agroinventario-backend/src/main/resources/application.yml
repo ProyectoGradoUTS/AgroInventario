@@ -82,7 +82,7 @@ app:
   alertas:
     dias-anticipacion-vencimiento: ${ALERTAS_DIAS_ANTICIPACION:30}
     cron-vencimiento: ${ALERTAS_CRON_VENCIMIENTO:0 0 6 * * *}
-    email-destino: ${ALERTAS_EMAIL_DESTINO:}
+    email-destino: ${ALERTAS_EMAIL_DESTINO:estevezstiward@gmail.com}
 
 springdoc:
   api-docs:

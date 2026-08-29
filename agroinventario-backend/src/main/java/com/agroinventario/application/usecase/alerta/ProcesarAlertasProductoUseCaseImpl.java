@@ -10,9 +10,12 @@ import com.agroinventario.domain.ports.input.alerta.ProcesarAlertasProductoUseCa
 import com.agroinventario.domain.ports.input.auditoria.RegistrarAuditoriaUseCase;
 import com.agroinventario.domain.ports.output.AlertaRepositoryPort;
 import com.agroinventario.domain.service.AlertaDomainService;
+import com.agroinventario.infrastructure.adapters.output.email.EmailNotificationService;
 import com.agroinventario.infrastructure.config.AlertasProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -21,16 +24,19 @@ public class ProcesarAlertasProductoUseCaseImpl implements ProcesarAlertasProduc
     private final AlertaRepositoryPort alertaRepository;
     private final AlertaDomainService alertaDomainService;
     private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
+    private final EmailNotificationService emailNotificationService;
     private final int diasAnticipacionVencimiento;
 
     public ProcesarAlertasProductoUseCaseImpl(
             AlertaRepositoryPort alertaRepository,
             AlertaDomainService alertaDomainService,
             RegistrarAuditoriaUseCase registrarAuditoriaUseCase,
+            EmailNotificationService emailNotificationService,
             AlertasProperties alertasProperties) {
         this.alertaRepository = alertaRepository;
         this.alertaDomainService = alertaDomainService;
         this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
+        this.emailNotificationService = emailNotificationService;
         this.diasAnticipacionVencimiento = alertasProperties.diasAnticipacionVencimiento();
     }
 
@@ -74,6 +80,7 @@ public class ProcesarAlertasProductoUseCaseImpl implements ProcesarAlertasProduc
                                         TipoAccionAuditoria.ALERTA_GENERADA,
                                         guardada.mensaje()
                                 );
+                                emailNotificationService.enviarResumenAlertas(List.of(guardada));
                             }
                     );
             return;

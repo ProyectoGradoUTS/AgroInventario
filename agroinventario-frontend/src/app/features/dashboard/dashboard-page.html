@@ -80,6 +80,72 @@
     </article>
   </section>
 
+  @if (data.resumen || data.ejecutivo) {
+    <section class="panels">
+      <mat-card class="panel">
+        <mat-card-header>
+          <mat-card-title>Resumen predictivo</mat-card-title>
+          <mat-card-subtitle>GET /v1/dashboard/resumen</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!data.resumen) {
+            <p class="empty">No hay datos predictivos disponibles.</p>
+          } @else {
+            <div class="summary-grid">
+              <div class="summary-metric">
+                <span class="summary-metric__label">Productos en riesgo</span>
+                <strong>{{ data.resumen.totalProductosEnRiesgo }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Críticos</span>
+                <strong>{{ data.resumen.totalProductosCriticos }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Alertas pendientes</span>
+                <strong>{{ data.resumen.totalAlertasPendientes }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Sin movimiento</span>
+                <strong>{{ data.resumen.totalSinMovimiento }}</strong>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="panel">
+        <mat-card-header>
+          <mat-card-title>Ejecutivo por categoría</mat-card-title>
+          <mat-card-subtitle>GET /v1/dashboard/ejecutivo</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!data.ejecutivo) {
+            <p class="empty">No hay consolidado por categoría.</p>
+          } @else {
+            <div class="summary-grid">
+              <div class="summary-metric">
+                <span class="summary-metric__label">Categorías</span>
+                <strong>{{ data.ejecutivo.totalCategorias }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Productos en riesgo</span>
+                <strong>{{ data.ejecutivo.productosEnRiesgo }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Más riesgosa</span>
+                <strong>{{ data.ejecutivo.categoriaMasRiesgosa || 'N/A' }}</strong>
+              </div>
+              <div class="summary-metric">
+                <span class="summary-metric__label">Críticos</span>
+                <strong>{{ data.ejecutivo.productosCriticos }}</strong>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+  }
+
   <section class="panels">
     <mat-card class="panel">
       <mat-card-header>
@@ -215,4 +281,48 @@
       }
     </mat-card-content>
   </mat-card>
+
+  @if (data.predicciones.length || data.recomendaciones.length) {
+    <mat-card class="panel panel--full">
+      <mat-card-header>
+        <mat-card-title>Inteligencia predictiva</mat-card-title>
+        <mat-card-subtitle>GET /v1/dashboard/predicciones · /v1/dashboard/recomendaciones</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (data.predicciones.length) {
+          <div class="prediction-grid">
+            @for (item of data.predicciones.slice(0, 6); track item.id || item.nombre) {
+              <div class="prediction-item">
+                <div class="prediction-item__top">
+                  <strong>{{ item.nombre }}</strong>
+                  <span class="chip" [class.chip--warn]="item.riesgo === 'ALTO' || item.riesgo === 'CRITICO'" [class.chip--info]="item.riesgo === 'MEDIO'" [class.chip--ok]="item.riesgo === 'BAJO'">
+                    {{ item.riesgo }}
+                  </span>
+                </div>
+                <div class="prediction-item__meta">Stock {{ item.stockActual }} / Mínimo {{ item.stockMinimo }}</div>
+                <div class="prediction-item__meta">Agotamiento estimado: {{ item.diasHastaAgotamiento }} días</div>
+                <div class="prediction-item__meta">Estrategia: {{ item.estrategia }}</div>
+                <div class="prediction-item__meta">Sugerencia: {{ item.cantidadSugerida }} unidades</div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (data.recomendaciones.length) {
+          <div class="recommendation-list">
+            @for (item of data.recomendaciones.slice(0, 5); track item.id || item.nombre) {
+              <div class="recommendation-item">
+                <div>
+                  <strong>{{ item.nombre }}</strong>
+                  <span class="text-muted"> · {{ item.categoria }}</span>
+                </div>
+                <div class="recommendation-item__meta">{{ item.estrategia }} · {{ item.cantidadSugerida }} und.</div>
+                <div class="recommendation-item__meta">{{ item.mensaje }}</div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
 }

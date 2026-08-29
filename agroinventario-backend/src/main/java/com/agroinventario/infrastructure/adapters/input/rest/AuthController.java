@@ -2,6 +2,7 @@ package com.agroinventario.infrastructure.adapters.input.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,6 +67,10 @@ public class AuthController {
     @GetMapping("/me")
     @Operation(summary = "Usuario autenticado", security = @SecurityRequirement(name = OpenApiConfig.BEARER_SCHEME))
     public ResponseEntity<ApiResponse<UsuarioResponse>> me(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new AuthenticationCredentialsNotFoundException("No autenticado o token inválido");
+        }
+
         var usuario = getCurrentUsuarioUseCase.ejecutar(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.ok(authDtoMapper.toUsuarioResponse(usuario)));
     }

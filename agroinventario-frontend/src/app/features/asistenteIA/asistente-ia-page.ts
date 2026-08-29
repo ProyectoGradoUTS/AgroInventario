@@ -38,11 +38,12 @@ export class AsistenteIaPage implements OnInit {
   readonly enviando = signal(false);
   readonly mensajes = signal<AsistenteMensajeUi[]>([]);
 
-  /** Sugerencias de UI (no son datos de API ni mocks de negocio). */
   readonly sugerencias = [
     '¿Qué productos tienen stock bajo?',
-    'Resumen de alertas pendientes',
-    '¿Cómo registrar una entrada de inventario?',
+    'Resumen general del inventario',
+    '¿Qué necesita reposición urgente?',
+    '¿Qué productos vencen pronto?',
+    '¿Cómo va la categoría de medicina?',
   ];
 
   readonly form = this.fb.nonNullable.group({
