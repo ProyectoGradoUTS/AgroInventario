@@ -12,7 +12,7 @@ public final class ProductoSpecifications {
     public static Specification<ProductoEntity> conFiltros(
             EstadoGeneral estado, Long categoriaId, String nombre) {
         return (root, query, cb) -> {
-            if (query != null) {
+            if (query != null && query.getResultType() != Long.class && query.getResultType() != long.class) {
                 root.fetch("categoria", jakarta.persistence.criteria.JoinType.LEFT);
                 query.distinct(true);
             }
