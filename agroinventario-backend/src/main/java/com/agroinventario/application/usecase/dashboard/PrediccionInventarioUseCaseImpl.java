@@ -2,8 +2,10 @@ package com.agroinventario.application.usecase.dashboard;
 
 import com.agroinventario.application.dto.response.PrediccionProductoResponse;
 import com.agroinventario.application.service.predictive.DatasetSinteticoPrediccionService;
+import com.agroinventario.domain.model.HistoricoInventarioResumen;
 import com.agroinventario.domain.model.Producto;
 import com.agroinventario.domain.ports.input.dashboard.PrediccionInventarioUseCase;
+import com.agroinventario.domain.ports.output.HistoricoInventarioRepositoryPort;
 import com.agroinventario.domain.ports.output.MovimientoInventarioRepositoryPort;
 import com.agroinventario.domain.ports.output.ProductoRepositoryPort;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,17 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
 
     private final ProductoRepositoryPort productoRepository;
     private final MovimientoInventarioRepositoryPort movimientoRepository;
+    private final HistoricoInventarioRepositoryPort historicoRepository;
     private final DatasetSinteticoPrediccionService datasetSinteticoPrediccionService;
 
     public PrediccionInventarioUseCaseImpl(
             ProductoRepositoryPort productoRepository,
             MovimientoInventarioRepositoryPort movimientoRepository,
+            HistoricoInventarioRepositoryPort historicoRepository,
             DatasetSinteticoPrediccionService datasetSinteticoPrediccionService) {
         this.productoRepository = productoRepository;
         this.movimientoRepository = movimientoRepository;
+        this.historicoRepository = historicoRepository;
         this.datasetSinteticoPrediccionService = datasetSinteticoPrediccionService;
     }
 
@@ -39,7 +44,10 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
     }
 
     private PrediccionProductoResponse toPrediccion(Producto producto) {
-        double consumoPromedio = calcularConsumoPromedio(producto);
+        HistoricoInventarioResumen resumenHistorico = historicoRepository
+                .resumirProducto(producto.id(), 90)
+                .orElse(null);
+        double consumoPromedio = calcularConsumoPromedio(producto, resumenHistorico);
         int leadTimeDias = leadTimeDias(producto);
         long diasHastaAgotamiento = producto.stockActual() <= 0 ? 0 : Math.max(0, Math.round((double) producto.stockActual() / Math.max(consumoPromedio, 0.5)));
         LocalDate fechaProyectadaAgotamiento = diasHastaAgotamiento == 0 ? LocalDate.now() : LocalDate.now().plusDays(diasHastaAgotamiento);
@@ -48,7 +56,13 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
         int cantidadSugerida = Math.max(0, (int) Math.ceil((consumoPromedio * leadTimeDias) + producto.stockMinimo() - producto.stockActual()));
 
         String estrategia = seleccionarEstrategia(producto, consumoPromedio, leadTimeDias, diasHastaAgotamiento, cantidadSugerida);
-        String riesgo = seleccionarRiesgo(producto, diasHastaAgotamiento, consumoPromedio, leadTimeDias);
+        String riesgo = seleccionarRiesgo(
+                producto,
+                diasHastaAgotamiento,
+                consumoPromedio,
+                leadTimeDias,
+                resumenHistorico
+        );
         String mensaje = construirMensaje(producto, diasHastaAgotamiento, cantidadSugerida, estrategia, riesgo);
 
         return new PrediccionProductoResponse(
@@ -70,7 +84,13 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
         );
     }
 
-    private double calcularConsumoPromedio(Producto producto) {
+    private double calcularConsumoPromedio(
+            Producto producto,
+            HistoricoInventarioResumen resumenHistorico) {
+        if (resumenHistorico != null && resumenHistorico.consumoPromedioDiario() > 0.0) {
+            return consumoConMargenDeVariabilidad(resumenHistorico);
+        }
+
         if (movimientoRepository.existsByProductoId(producto.id())) {
             double promedio = movimientoRepository.findByProductoId(producto.id()).stream()
                     .mapToDouble(m -> Math.abs(m.cantidad()))
@@ -81,11 +101,17 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
             }
         }
 
-        var historico = datasetSinteticoPrediccionService.generarParaProducto(producto);
-        return historico.stream()
+        var historicoSintetico = datasetSinteticoPrediccionService.generarParaProducto(producto);
+        return historicoSintetico.stream()
                 .mapToDouble(h -> h.consumoReal())
                 .average()
                 .orElse(Math.max(0.3, producto.stockMinimo() / 7.0));
+    }
+
+    private double consumoConMargenDeVariabilidad(HistoricoInventarioResumen resumen) {
+        double promedio = resumen.consumoPromedioDiario();
+        double variabilidad = resumen.desviacionConsumo();
+        return Math.max(0.2, promedio + (variabilidad * 0.5));
     }
 
     private int leadTimeDias(Producto producto) {
@@ -115,7 +141,15 @@ public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseC
         return "MONITOREO";
     }
 
-    private String seleccionarRiesgo(Producto producto, long diasHastaAgotamiento, double consumoPromedio, int leadTimeDias) {
+    private String seleccionarRiesgo(
+            Producto producto,
+            long diasHastaAgotamiento,
+            double consumoPromedio,
+            int leadTimeDias,
+            HistoricoInventarioResumen resumenHistorico) {
+        if (resumenHistorico != null && resumenHistorico.diasStockout() > 0) {
+            return resumenHistorico.diasStockout() >= 7 ? "ALTO" : "MEDIO";
+        }
         if (producto.stockActual() <= producto.stockMinimo() || diasHastaAgotamiento <= 7) {
             return "ALTO";
         }
