@@ -1,41 +1,43 @@
 <app-page-header
-  title="Asistente IA"
-  subtitle="Shell preparado para consumir la API cuando el backend la publique"
+  title="Asistente de inventario"
+  subtitle="Hable con el inventario: stock, vencimientos, agotamiento y qué conviene pedir"
   icon="smart_toy"
 />
 
 <div class="asistente-layout">
   <mat-card class="status-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>info</mat-icon>
-      <mat-card-title>Estado de integración</mat-card-title>
-      <mat-card-subtitle>Sin llamadas inventadas ni datos ficticios de negocio</mat-card-subtitle>
-    </mat-card-header>
+    <header>
+      <h2>Hoy en el inventario</h2>
+      <p>Cifras en vivo para acompañar la conversación.</p>
+    </header>
     <mat-card-content>
       <dl class="status-list">
         <div>
-          <dt>Feature flag</dt>
+          <dt>Asistente</dt>
           <dd>
             <span class="chip" [class.chip--ok]="habilitado" [class.chip--warn]="!habilitado">
-              {{ habilitado ? 'ENABLED' : 'DISABLED' }}
+              {{ habilitado ? 'Listo para consultar' : 'No disponible' }}
             </span>
           </dd>
         </div>
-        <div>
-          <dt>Path provisional</dt>
-          <dd><code>{{ basePath }}</code></dd>
-        </div>
-        <div>
-          <dt>Servicio</dt>
-          <dd><code>AsistenteIaService</code></dd>
-        </div>
-        <div>
-          <dt>Acción al habilitar</dt>
-          <dd>
-            1) Publicar DTO/endpoints en Spring · 2) Alinear modelos TS · 3) Activar
-            <code>asistenteIa.enabled</code>
-          </dd>
-        </div>
+        @if (estado(); as info) {
+          <div>
+            <dt>Productos activos</dt>
+            <dd>{{ info.productosActivos ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Con stock bajo</dt>
+            <dd>{{ info.stockBajo ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Alertas pendientes</dt>
+            <dd>{{ info.alertasPendientes ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Registros de consumo</dt>
+            <dd>{{ info.registrosHistoricos == null ? '—' : (info.registrosHistoricos | number) }}</dd>
+          </div>
+        }
       </dl>
     </mat-card-content>
   </mat-card>
@@ -43,17 +45,11 @@
   <mat-card class="chat-card">
     <mat-card-header>
       <mat-card-title>Conversación</mat-card-title>
-      <mat-card-subtitle>
-        @if (habilitado) {
-          Listo para POST {{ basePath }}/consultar
-        } @else {
-          Entrada deshabilitada hasta que exista el backend
-        }
-      </mat-card-subtitle>
+      <mat-card-subtitle>Pregunte como si habláramos; las respuestas usan el inventario real</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
-      <div class="chat-thread" role="log" aria-live="polite">
+      <div class="chat-thread" #chatThread role="log" aria-live="polite">
         @for (msg of mensajes(); track msg.id) {
           <article class="bubble" [attr.data-rol]="msg.rol">
             <header>
@@ -66,13 +62,21 @@
                     Asistente
                   }
                   @default {
-                    Sistema
+                    Aviso
                   }
                 }
               </strong>
-              <time>{{ msg.fecha | date: 'HH:mm:ss' }}</time>
+              <time>{{ msg.fecha | date: 'HH:mm' }}</time>
             </header>
             <p>{{ msg.texto }}</p>
+          </article>
+        }
+        @if (enviando()) {
+          <article class="bubble bubble--typing" data-rol="asistente">
+            <header>
+              <strong>Asistente</strong>
+            </header>
+            <p>Un momento, estoy revisando el inventario…</p>
           </article>
         }
       </div>
@@ -82,7 +86,7 @@
           <button
             mat-stroked-button
             type="button"
-            [disabled]="!habilitado"
+            [disabled]="!habilitado || enviando()"
             (click)="usarSugerencia(item)"
           >
             {{ item }}
@@ -98,11 +102,7 @@
             formControlName="pregunta"
             rows="2"
             maxlength="1000"
-            [placeholder]="
-              habilitado
-                ? 'Ej.: ¿Cuáles productos requieren reposición?'
-                : 'Disponible cuando el backend publique el asistente'
-            "
+            placeholder="Ej.: ¿Qué me conviene pedir esta semana para no quedarme sin stock?"
           ></textarea>
         </mat-form-field>
 

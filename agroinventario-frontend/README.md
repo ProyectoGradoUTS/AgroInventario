@@ -47,15 +47,12 @@ src/app
 | 7 — Inventario / Movimientos | ✅ |
 | 8 — Alertas | ✅ |
 | 9 — Auditoría | ✅ |
-| 10 — Asistente IA (shell) | ✅ |
+| 10 — Asistente IA | ✅ |
 
-### Asistente IA (Fase 10)
+### Asistente IA
 
-El backend **aún no** expone este módulo. Para activarlo cuando exista:
-
-1. Alinear `src/app/core/models/asistente-ia.model.ts` con los DTO reales.
-2. Ajustar `AsistenteIaService` (rutas y payload).
-3. En `environment*.ts`: `asistenteIa.enabled = true` y `basePath` correcto.
+El chat en `/app/asistente-ia` consulta `GET /v1/asistente/estado` y `POST /v1/asistente/consultar`.
+Las respuestas usan inventario, alertas y proyección de consumo. Opcionalmente un LLM si el backend tiene `IA_API_KEY`.
 
 ### Credenciales de desarrollo
 

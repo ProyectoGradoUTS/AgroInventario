@@ -47,12 +47,16 @@ spring:
     port: 587
     username: ${MAIL_USERNAME:tu_correo@gmail.com}
     password: ${MAIL_PASSWORD:tu_password_de_aplicacion}
+    test-connection: false
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 3000
+          timeout: 3000
+          writetimeout: 3000
 
 server:
   port: ${SERVER_PORT:8080}
@@ -67,6 +71,9 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+  health:
+    mail:
+      enabled: false
 
 app:
   name: Agro Inventario API
@@ -83,6 +90,13 @@ app:
     dias-anticipacion-vencimiento: ${ALERTAS_DIAS_ANTICIPACION:30}
     cron-vencimiento: ${ALERTAS_CRON_VENCIMIENTO:0 0 6 * * *}
     email-destino: ${ALERTAS_EMAIL_DESTINO:estevezstiward@gmail.com}
+
+  ia:
+    provider: ${IA_PROVIDER:none}
+    api-key: ${IA_API_KEY:}
+    model: ${IA_MODEL:gpt-4o-mini}
+    timeout-ms: ${IA_TIMEOUT_MS:8000}
+    cron-prediccion: ${IA_CRON_PREDICCION:0 15 6 * * *}
 
 springdoc:
   api-docs:

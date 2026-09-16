@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
  * Registro de beans de configuración global de la aplicación.
  */
 @Configuration
-@EnableConfigurationProperties({AppProperties.class, JwtProperties.class, AlertasProperties.class})
+@EnableConfigurationProperties({AppProperties.class, JwtProperties.class, AlertasProperties.class, IaProperties.class})
 public class AppConfig {
 }

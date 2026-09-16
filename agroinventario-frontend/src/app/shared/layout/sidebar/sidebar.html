@@ -4,30 +4,38 @@
     @if (!collapsed) {
       <div class="sidebar__titles">
         <span class="sidebar__name">Agro Inventario</span>
-        <span class="sidebar__tag">Gestión agropecuaria</span>
+        <span class="sidebar__tag">Inventario inteligente</span>
       </div>
     }
   </div>
 
   <nav class="sidebar__nav" aria-label="Navegación principal">
-    <mat-nav-list>
-      @for (item of items(); track item.route) {
-        <a
-          mat-list-item
-          [routerLink]="item.route"
-          routerLinkActive="is-active"
-          (click)="navigate.emit()"
-        >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          @if (!collapsed) {
-            <span matListItemTitle>{{ item.label }}</span>
+    @for (group of groups(); track group.id) {
+      <div class="sidebar__group">
+        @if (!collapsed) {
+          <p class="sidebar__section">{{ group.label }}</p>
+        }
+        <mat-nav-list>
+          @for (item of group.items; track item.route) {
+            <a
+              mat-list-item
+              [routerLink]="item.route"
+              routerLinkActive="is-active"
+              [title]="item.label"
+              (click)="navigate.emit()"
+            >
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              @if (!collapsed) {
+                <span matListItemTitle>{{ item.label }}</span>
+              }
+            </a>
           }
-        </a>
-      }
-    </mat-nav-list>
+        </mat-nav-list>
+      </div>
+    }
   </nav>
 
   @if (!collapsed) {
-    <footer class="sidebar__footer">ERP · Inventario inteligente</footer>
+    <footer class="sidebar__footer">Agropecuario · Bucaramanga</footer>
   }
 </aside>

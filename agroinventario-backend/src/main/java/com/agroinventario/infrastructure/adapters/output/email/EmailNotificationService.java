@@ -25,11 +25,23 @@ public class EmailNotificationService {
     @Value("${spring.mail.username:}")
     private String from;
 
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
     @Value("${app.alertas.email-destino:}")
     private String emailDestino;
 
     public EmailNotificationService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+    }
+
+    private boolean correoOperativo() {
+        if (from == null || from.isBlank() || "tu_correo@gmail.com".equalsIgnoreCase(from.trim())) {
+            return false;
+        }
+        return mailPassword != null
+                && !mailPassword.isBlank()
+                && !"tu_password_de_aplicacion".equals(mailPassword);
     }
 
     private String destinatario() {
@@ -49,6 +61,11 @@ public class EmailNotificationService {
      */
     public void enviarAlertaVencimiento(List<Producto> productos) {
         if (productos == null || productos.isEmpty()) {
+            return;
+        }
+
+        if (!correoOperativo()) {
+            log.debug("Correo no operativo: faltan MAIL_USERNAME / MAIL_PASSWORD reales. Se omite el envío de alerta.");
             return;
         }
 
@@ -89,6 +106,11 @@ public class EmailNotificationService {
 
     public void enviarResumenAlertas(List<Alerta> alertas) {
         if (alertas == null || alertas.isEmpty()) {
+            return;
+        }
+
+        if (!correoOperativo()) {
+            log.debug("Correo no operativo: faltan MAIL_USERNAME / MAIL_PASSWORD reales. Se omite el envío de resumen.");
             return;
         }
 

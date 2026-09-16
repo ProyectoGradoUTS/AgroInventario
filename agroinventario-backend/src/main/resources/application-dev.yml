@@ -1,5 +1,8 @@
 # Perfil de desarrollo local
 spring:
+  devtools:
+    restart:
+      enabled: false
   sql:
     init:
       mode: always

@@ -1,6 +1,6 @@
 <app-page-header
   title="Dashboard"
-  [subtitle]="'Bienvenido, ' + (user()?.nombre || 'usuario') + ' · Vista operativa del inventario'"
+  [subtitle]="'Hola, ' + (user()?.nombre || 'usuario') + '. Resumen operativo y recomendaciones de reposición.'"
   icon="dashboard"
 >
   <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
@@ -12,7 +12,7 @@
 @if (loading()) {
   <div class="dashboard-state">
     <mat-spinner diameter="40" />
-    <p>Cargando indicadores desde la API…</p>
+    <p>Cargando indicadores…</p>
   </div>
 } @else if (errorMessage(); as message) {
   <div class="dashboard-state dashboard-state--error" role="alert">
@@ -31,298 +31,294 @@
     </div>
   }
 
-  <section class="kpi-grid" aria-label="Indicadores clave">
-    <article class="kpi-card kpi-card--primary">
-      <div class="kpi-card__icon"><mat-icon>inventory_2</mat-icon></div>
-      <div>
-        <span class="kpi-card__label">Productos activos</span>
-        <strong class="kpi-card__value">{{ data.kpis.productosActivos }}</strong>
-        <span class="kpi-card__hint">{{ data.kpis.totalProductos }} en catálogo</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--warning">
-      <div class="kpi-card__icon"><mat-icon>trending_down</mat-icon></div>
-      <div>
-        <span class="kpi-card__label">Stock bajo</span>
-        <strong class="kpi-card__value">{{ data.kpis.productosStockBajo }}</strong>
-        <span class="kpi-card__hint">Requieren reposición</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--danger">
-      <div class="kpi-card__icon"><mat-icon>notifications_active</mat-icon></div>
-      <div>
-        <span class="kpi-card__label">Alertas pendientes</span>
-        <strong class="kpi-card__value">{{ data.kpis.alertasPendientes }}</strong>
-        <span class="kpi-card__hint">{{ data.kpis.alertasLeidas }} leídas</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--secondary">
-      <div class="kpi-card__icon"><mat-icon>swap_vert</mat-icon></div>
-      <div>
-        <span class="kpi-card__label">Movimientos</span>
-        <strong class="kpi-card__value">{{ data.kpis.totalMovimientos }}</strong>
-        <span class="kpi-card__hint">
-          {{ data.kpis.entradas }} entradas · {{ data.kpis.salidas }} salidas
-        </span>
-      </div>
-    </article>
-
-    <article class="kpi-card">
-      <div class="kpi-card__icon"><mat-icon>category</mat-icon></div>
-      <div>
-        <span class="kpi-card__label">Categorías</span>
-        <strong class="kpi-card__value">{{ data.kpis.totalCategorias }}</strong>
-        <span class="kpi-card__hint">Clasificación de productos</span>
-      </div>
-    </article>
+  <section class="dash-section" aria-labelledby="sec-operacion">
+    <header class="dash-section__head">
+      <h2 id="sec-operacion">Operación</h2>
+      <p>Estado actual del catálogo, stock y movimientos.</p>
+    </header>
+    <div class="kpi-grid kpi-grid--4">
+      <article class="kpi-card kpi-card--primary">
+        <div class="kpi-card__icon"><mat-icon>inventory_2</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Productos activos</span>
+          <strong class="kpi-card__value">{{ data.kpis.productosActivos }}</strong>
+          <span class="kpi-card__hint">{{ data.kpis.totalProductos }} en catálogo</span>
+        </div>
+      </article>
+      <article class="kpi-card kpi-card--warning">
+        <div class="kpi-card__icon"><mat-icon>trending_down</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Stock bajo</span>
+          <strong class="kpi-card__value">{{ data.kpis.productosStockBajo }}</strong>
+          <span class="kpi-card__hint">Por debajo del mínimo</span>
+        </div>
+      </article>
+      <article class="kpi-card kpi-card--danger">
+        <div class="kpi-card__icon"><mat-icon>notifications_active</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Alertas pendientes</span>
+          <strong class="kpi-card__value">{{ data.kpis.alertasPendientes }}</strong>
+          <span class="kpi-card__hint">{{ data.kpis.alertasLeidas }} leídas</span>
+        </div>
+      </article>
+      <article class="kpi-card kpi-card--secondary">
+        <div class="kpi-card__icon"><mat-icon>swap_vert</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Movimientos</span>
+          <strong class="kpi-card__value">{{ data.kpis.totalMovimientos }}</strong>
+          <span class="kpi-card__hint">{{ data.kpis.entradas }} entradas · {{ data.kpis.salidas }} salidas</span>
+        </div>
+      </article>
+    </div>
   </section>
 
-  @if (data.resumen || data.ejecutivo) {
-    <section class="panels">
-      <mat-card class="panel">
-        <mat-card-header>
-          <mat-card-title>Resumen predictivo</mat-card-title>
-          <mat-card-subtitle>GET /v1/dashboard/resumen</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          @if (!data.resumen) {
-            <p class="empty">No hay datos predictivos disponibles.</p>
-          } @else {
-            <div class="summary-grid">
-              <div class="summary-metric">
-                <span class="summary-metric__label">Productos en riesgo</span>
-                <strong>{{ data.resumen.totalProductosEnRiesgo }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Críticos</span>
-                <strong>{{ data.resumen.totalProductosCriticos }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Alertas pendientes</span>
-                <strong>{{ data.resumen.totalAlertasPendientes }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Sin movimiento</span>
-                <strong>{{ data.resumen.totalSinMovimiento }}</strong>
-              </div>
-            </div>
-          }
-        </mat-card-content>
-      </mat-card>
+  <section class="dash-section" aria-labelledby="sec-riesgo">
+    <header class="dash-section__head">
+      <h2 id="sec-riesgo">Riesgo e inteligencia</h2>
+      <p>Proyección de consumo a 90 días, vencimientos y pedidos para evitar quiebre o merma.</p>
+    </header>
+    <div class="kpi-grid kpi-grid--4">
+      <article class="kpi-card kpi-card--danger">
+        <div class="kpi-card__icon"><mat-icon>hourglass_empty</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Se agotan en 7 días</span>
+          <strong class="kpi-card__value">{{ data.resumen?.productosAgotamiento7d ?? 0 }}</strong>
+          <span class="kpi-card__hint">Según consumo histórico</span>
+        </div>
+      </article>
+      <article class="kpi-card kpi-card--warning">
+        <div class="kpi-card__icon"><mat-icon>event_busy</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Vencen en 30 días</span>
+          <strong class="kpi-card__value">{{ data.resumen?.productosVencimiento30d ?? 0 }}</strong>
+          <span class="kpi-card__hint">Riesgo de pérdida</span>
+        </div>
+      </article>
+      <article class="kpi-card kpi-card--primary">
+        <div class="kpi-card__icon"><mat-icon>shopping_cart</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Pedidos urgentes</span>
+          <strong class="kpi-card__value">{{ data.resumen?.recomendacionesUrgentes ?? 0 }}</strong>
+          <span class="kpi-card__hint">Reposición sugerida</span>
+        </div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-card__icon"><mat-icon>payments</mat-icon></div>
+        <div>
+          <span class="kpi-card__label">Valor en riesgo</span>
+          <strong class="kpi-card__value">${{ (data.resumen?.valorEnRiesgoVencimiento ?? 0) | number: '1.0-0' }}</strong>
+          <span class="kpi-card__hint">Stock próximo a vencer</span>
+        </div>
+      </article>
+    </div>
+  </section>
 
-      <mat-card class="panel">
-        <mat-card-header>
-          <mat-card-title>Ejecutivo por categoría</mat-card-title>
-          <mat-card-subtitle>GET /v1/dashboard/ejecutivo</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          @if (!data.ejecutivo) {
-            <p class="empty">No hay consolidado por categoría.</p>
-          } @else {
-            <div class="summary-grid">
-              <div class="summary-metric">
-                <span class="summary-metric__label">Categorías</span>
-                <strong>{{ data.ejecutivo.totalCategorias }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Productos en riesgo</span>
-                <strong>{{ data.ejecutivo.productosEnRiesgo }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Más riesgosa</span>
-                <strong>{{ data.ejecutivo.categoriaMasRiesgosa || 'N/A' }}</strong>
-              </div>
-              <div class="summary-metric">
-                <span class="summary-metric__label">Críticos</span>
-                <strong>{{ data.ejecutivo.productosCriticos }}</strong>
-              </div>
+  <section class="dash-section" aria-labelledby="sec-reposicion">
+    <header class="dash-section__head">
+      <h2 id="sec-reposicion">Reposición recomendada</h2>
+      <p>Cantidades para cubrir demanda, lead time y stock mínimo. Evita compras innecesarias en líneas que vencen.</p>
+    </header>
+    <mat-card class="panel panel--full">
+      <mat-card-content>
+        @if (!data.recomendaciones.length) {
+          <p class="empty">No hay pedidos sugeridos. El inventario cubre el mínimo y el consumo proyectado.</p>
+        } @else {
+          <table mat-table [dataSource]="recomendacionesVisibles(data)" class="data-table">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Producto</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="cell-main">{{ row.nombre }}</div>
+                <div class="cell-sub">{{ row.categoria }}</div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="stock">
+              <th mat-header-cell *matHeaderCellDef>Stock</th>
+              <td mat-cell *matCellDef="let row">{{ row.stockActual }} / {{ row.stockMinimo }}</td>
+            </ng-container>
+            <ng-container matColumnDef="agotamiento">
+              <th mat-header-cell *matHeaderCellDef>Agotamiento</th>
+              <td mat-cell *matCellDef="let row">{{ row.diasHastaAgotamiento }} días</td>
+            </ng-container>
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef>Pedir</th>
+              <td mat-cell *matCellDef="let row"><strong>{{ row.cantidadSugerida }}</strong></td>
+            </ng-container>
+            <ng-container matColumnDef="estrategia">
+              <th mat-header-cell *matHeaderCellDef>Estrategia</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip" [class.chip--warn]="row.riesgo === 'ALTO' || row.riesgo === 'CRITICO'">{{ row.estrategia }}</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="recomendacionColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: recomendacionColumns"></tr>
+          </table>
+          <a mat-button color="primary" routerLink="/app/reportes">Ver reporte completo</a>
+        }
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <section class="dash-section" aria-labelledby="sec-proyeccion">
+    <header class="dash-section__head">
+      <h2 id="sec-proyeccion">Proyección de agotamiento</h2>
+      <p>Productos que se acaban primero según el consumo diario observado.</p>
+    </header>
+    @if (!data.predicciones.length) {
+      <p class="empty">Aún no hay proyecciones. Reinicie el backend para sincronizar el histórico.</p>
+    } @else {
+      <div class="prediction-grid">
+        @for (item of prediccionesVisibles(data); track item.id || item.nombre) {
+          <article class="prediction-item">
+            <div class="prediction-item__top">
+              <strong>{{ item.nombre }}</strong>
+              <span class="chip" [class.chip--warn]="item.riesgo === 'ALTO' || item.riesgo === 'CRITICO'" [class.chip--info]="item.riesgo === 'MEDIO'" [class.chip--ok]="item.riesgo === 'BAJO'">
+                {{ item.riesgo }}
+              </span>
             </div>
-          }
+            <p class="prediction-item__meta">Stock {{ item.stockActual }} · {{ item.consumoPromedio }}/día</p>
+            <p class="prediction-item__meta">Se agota en {{ item.diasHastaAgotamiento }} días ({{ item.fechaProyectadaAgotamiento | date: 'dd/MM/yyyy' }})</p>
+            <p class="prediction-item__meta">Pedir {{ item.cantidadSugerida }} und.</p>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (data.ejecutivo; as ejecutivo) {
+    @if (ejecutivo.categorias.length) {
+    <section class="dash-section" aria-labelledby="sec-categorias">
+      <header class="dash-section__head">
+        <h2 id="sec-categorias">Riesgo por categoría</h2>
+        <p>La familia más crítica ahora es {{ ejecutivo.categoriaMasRiesgosa }}.</p>
+      </header>
+      <mat-card class="panel panel--full">
+        <mat-card-content>
+          <table mat-table [dataSource]="ejecutivo.categorias" class="data-table">
+            <ng-container matColumnDef="categoria">
+              <th mat-header-cell *matHeaderCellDef>Categoría</th>
+              <td mat-cell *matCellDef="let row">{{ row.categoria }}</td>
+            </ng-container>
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Productos</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalProductos }}</td>
+            </ng-container>
+            <ng-container matColumnDef="stockBajo">
+              <th mat-header-cell *matHeaderCellDef>Stock bajo</th>
+              <td mat-cell *matCellDef="let row">{{ row.stockBajo }}</td>
+            </ng-container>
+            <ng-container matColumnDef="criticos">
+              <th mat-header-cell *matHeaderCellDef>Críticos</th>
+              <td mat-cell *matCellDef="let row">{{ row.productosCriticos }}</td>
+            </ng-container>
+            <ng-container matColumnDef="consumo">
+              <th mat-header-cell *matHeaderCellDef>Consumo/día</th>
+              <td mat-cell *matCellDef="let row">{{ row.consumoPromedio }}</td>
+            </ng-container>
+            <ng-container matColumnDef="nivel">
+              <th mat-header-cell *matHeaderCellDef>Nivel</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip" [class.chip--warn]="row.nivelRiesgo === 'ALTO'" [class.chip--info]="row.nivelRiesgo === 'MEDIO'" [class.chip--ok]="row.nivelRiesgo === 'BAJO'">
+                  {{ row.nivelRiesgo }}
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="categoriaColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: categoriaColumns"></tr>
+          </table>
         </mat-card-content>
       </mat-card>
     </section>
+    }
   }
 
-  <section class="panels">
-    <mat-card class="panel">
-      <mat-card-header>
-        <mat-card-title>Alertas recientes</mat-card-title>
-        <mat-card-subtitle>GET /v1/alertas</mat-card-subtitle>
-        <a mat-button color="primary" routerLink="/app/alertas">Ver todas</a>
-      </mat-card-header>
-      <mat-card-content>
-        @if (!data.alertasRecientes.length) {
-          <p class="empty">No hay alertas registradas.</p>
-        } @else {
-          <table mat-table [dataSource]="data.alertasRecientes" class="data-table">
-            <ng-container matColumnDef="producto">
-              <th mat-header-cell *matHeaderCellDef>Producto</th>
-              <td mat-cell *matCellDef="let row">
-                <div class="cell-main">{{ row.productoNombre }}</div>
-                <div class="cell-sub">{{ row.mensaje }}</div>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="tipo">
-              <th mat-header-cell *matHeaderCellDef>Tipo</th>
-              <td mat-cell *matCellDef="let row">
-                <span class="chip chip--neutral">{{ row.tipoAlerta }}</span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="estado">
-              <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let row">
-                <span
-                  class="chip"
-                  [class.chip--warn]="row.estado === 'PENDIENTE'"
-                  [class.chip--info]="row.estado === 'LEIDA'"
-                  [class.chip--ok]="row.estado === 'RESUELTA'"
-                >
-                  {{ row.estado }}
-                </span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="fecha">
-              <th mat-header-cell *matHeaderCellDef>Fecha</th>
-              <td mat-cell *matCellDef="let row">
-                {{ row.fechaGeneracion | date: 'dd/MM/yyyy HH:mm' }}
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="alertColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: alertColumns"></tr>
-          </table>
-        }
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="panel">
-      <mat-card-header>
-        <mat-card-title>Últimos movimientos</mat-card-title>
-        <mat-card-subtitle>GET /v1/inventario/movimientos</mat-card-subtitle>
-        <a mat-button color="primary" routerLink="/app/movimientos">Ver historial</a>
-      </mat-card-header>
-      <mat-card-content>
-        @if (!data.movimientosRecientes.length) {
-          <p class="empty">No hay movimientos registrados.</p>
-        } @else {
-          <table mat-table [dataSource]="data.movimientosRecientes" class="data-table">
-            <ng-container matColumnDef="producto">
-              <th mat-header-cell *matHeaderCellDef>Producto</th>
-              <td mat-cell *matCellDef="let row">{{ row.productoNombre }}</td>
-            </ng-container>
-            <ng-container matColumnDef="tipo">
-              <th mat-header-cell *matHeaderCellDef>Tipo</th>
-              <td mat-cell *matCellDef="let row">
-                <span
-                  class="chip"
-                  [class.chip--ok]="row.tipoMovimiento === 'ENTRADA'"
-                  [class.chip--warn]="row.tipoMovimiento === 'SALIDA'"
-                >
-                  {{ row.tipoMovimiento }}
-                </span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="cantidad">
-              <th mat-header-cell *matHeaderCellDef>Cant.</th>
-              <td mat-cell *matCellDef="let row">{{ row.cantidad }}</td>
-            </ng-container>
-            <ng-container matColumnDef="usuario">
-              <th mat-header-cell *matHeaderCellDef>Usuario</th>
-              <td mat-cell *matCellDef="let row">{{ row.usuarioNombre }}</td>
-            </ng-container>
-            <ng-container matColumnDef="fecha">
-              <th mat-header-cell *matHeaderCellDef>Fecha</th>
-              <td mat-cell *matCellDef="let row">
-                {{ row.fechaMovimiento | date: 'dd/MM/yyyy HH:mm' }}
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="movimientoColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: movimientoColumns"></tr>
-          </table>
-        }
-      </mat-card-content>
-    </mat-card>
-  </section>
-
-  <mat-card class="panel panel--full">
-    <mat-card-header>
-      <mat-card-title>Productos con stock bajo</mat-card-title>
-      <mat-card-subtitle>Derivado de GET /v1/productos · campo stockBajo</mat-card-subtitle>
-      <a mat-button color="primary" routerLink="/app/productos">Ir a productos</a>
-    </mat-card-header>
-    <mat-card-content>
-      @if (!data.productosStockBajo.length) {
-        <p class="empty">Ningún producto activo está por debajo del stock mínimo.</p>
-      } @else {
-        <table mat-table [dataSource]="data.productosStockBajo" class="data-table">
-          <ng-container matColumnDef="nombre">
-            <th mat-header-cell *matHeaderCellDef>Producto</th>
-            <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
-          </ng-container>
-          <ng-container matColumnDef="categoria">
-            <th mat-header-cell *matHeaderCellDef>Categoría</th>
-            <td mat-cell *matCellDef="let row">{{ row.categoriaNombre }}</td>
-          </ng-container>
-          <ng-container matColumnDef="stock">
-            <th mat-header-cell *matHeaderCellDef>Stock actual</th>
-            <td mat-cell *matCellDef="let row">
-              <strong class="text-warn">{{ row.stockActual }}</strong>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="minimo">
-            <th mat-header-cell *matHeaderCellDef>Mínimo</th>
-            <td mat-cell *matCellDef="let row">{{ row.stockMinimo }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="stockColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: stockColumns"></tr>
-        </table>
-      }
-    </mat-card-content>
-  </mat-card>
-
-  @if (data.predicciones.length || data.recomendaciones.length) {
-    <mat-card class="panel panel--full">
-      <mat-card-header>
-        <mat-card-title>Inteligencia predictiva</mat-card-title>
-        <mat-card-subtitle>GET /v1/dashboard/predicciones · /v1/dashboard/recomendaciones</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        @if (data.predicciones.length) {
-          <div class="prediction-grid">
-            @for (item of data.predicciones.slice(0, 6); track item.id || item.nombre) {
-              <div class="prediction-item">
-                <div class="prediction-item__top">
-                  <strong>{{ item.nombre }}</strong>
-                  <span class="chip" [class.chip--warn]="item.riesgo === 'ALTO' || item.riesgo === 'CRITICO'" [class.chip--info]="item.riesgo === 'MEDIO'" [class.chip--ok]="item.riesgo === 'BAJO'">
-                    {{ item.riesgo }}
+  <section class="dash-section" aria-labelledby="sec-actividad">
+    <header class="dash-section__head">
+      <h2 id="sec-actividad">Actividad reciente</h2>
+      <p>Alertas de stock o vencimiento y últimos movimientos de inventario.</p>
+    </header>
+    <div class="panels">
+      <mat-card class="panel">
+        <mat-card-header>
+          <mat-card-title>Alertas</mat-card-title>
+          <a mat-button color="primary" routerLink="/app/alertas">Ver todas</a>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!data.alertasRecientes.length) {
+            <p class="empty">No hay alertas registradas.</p>
+          } @else {
+            <table mat-table [dataSource]="data.alertasRecientes" class="data-table">
+              <ng-container matColumnDef="producto">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let row">
+                  <div class="cell-main">{{ row.productoNombre }}</div>
+                  <div class="cell-sub">{{ row.mensaje }}</div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="chip chip--neutral">{{ row.tipoAlerta }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="chip" [class.chip--warn]="row.estado === 'PENDIENTE'" [class.chip--info]="row.estado === 'LEIDA'" [class.chip--ok]="row.estado === 'RESUELTA'">
+                    {{ row.estado }}
                   </span>
-                </div>
-                <div class="prediction-item__meta">Stock {{ item.stockActual }} / Mínimo {{ item.stockMinimo }}</div>
-                <div class="prediction-item__meta">Agotamiento estimado: {{ item.diasHastaAgotamiento }} días</div>
-                <div class="prediction-item__meta">Estrategia: {{ item.estrategia }}</div>
-                <div class="prediction-item__meta">Sugerencia: {{ item.cantidadSugerida }} unidades</div>
-              </div>
-            }
-          </div>
-        }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ row.fechaGeneracion | date: 'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="alertColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: alertColumns"></tr>
+            </table>
+          }
+        </mat-card-content>
+      </mat-card>
 
-        @if (data.recomendaciones.length) {
-          <div class="recommendation-list">
-            @for (item of data.recomendaciones.slice(0, 5); track item.id || item.nombre) {
-              <div class="recommendation-item">
-                <div>
-                  <strong>{{ item.nombre }}</strong>
-                  <span class="text-muted"> · {{ item.categoria }}</span>
-                </div>
-                <div class="recommendation-item__meta">{{ item.estrategia }} · {{ item.cantidadSugerida }} und.</div>
-                <div class="recommendation-item__meta">{{ item.mensaje }}</div>
-              </div>
-            }
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  }
+      <mat-card class="panel">
+        <mat-card-header>
+          <mat-card-title>Movimientos</mat-card-title>
+          <a mat-button color="primary" routerLink="/app/movimientos">Ver historial</a>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!data.movimientosRecientes.length) {
+            <p class="empty">No hay movimientos registrados.</p>
+          } @else {
+            <table mat-table [dataSource]="data.movimientosRecientes" class="data-table">
+              <ng-container matColumnDef="producto">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let row">{{ row.productoNombre }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="chip" [class.chip--ok]="row.tipoMovimiento === 'ENTRADA'" [class.chip--warn]="row.tipoMovimiento === 'SALIDA'">
+                    {{ row.tipoMovimiento }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="cantidad">
+                <th mat-header-cell *matHeaderCellDef>Cant.</th>
+                <td mat-cell *matCellDef="let row">{{ row.cantidad }}</td>
+              </ng-container>
+              <ng-container matColumnDef="usuario">
+                <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                <td mat-cell *matCellDef="let row">{{ row.usuarioNombre }}</td>
+              </ng-container>
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ row.fechaMovimiento | date: 'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="movimientoColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: movimientoColumns"></tr>
+            </table>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
 }

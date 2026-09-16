@@ -37,9 +37,7 @@ public class MovimientoInventarioPersistenceAdapter implements MovimientoInventa
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado"));
 
         var saved = jpaRepository.save(mapper.toEntity(movimiento, producto, usuario));
-        return jpaRepository.findById(saved.getId())
-                .map(mapper::toDomain)
-                .orElseThrow();
+        return mapper.toDomain(saved, producto, usuario);
     }
 
     @Override

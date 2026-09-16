@@ -10,6 +10,7 @@ import com.agroinventario.domain.ports.input.alerta.ProcesarAlertasProductoUseCa
 import com.agroinventario.domain.ports.input.auditoria.RegistrarAuditoriaUseCase;
 import com.agroinventario.domain.ports.input.inventario.RegistrarMovimientoInventarioUseCase;
 import com.agroinventario.domain.ports.output.CurrentUserPort;
+import com.agroinventario.domain.ports.output.HistoricoInventarioRepositoryPort;
 import com.agroinventario.domain.ports.output.MovimientoInventarioRepositoryPort;
 import com.agroinventario.domain.ports.output.ProductoRepositoryPort;
 import com.agroinventario.domain.ports.output.UsuarioRepositoryPort;
@@ -17,6 +18,7 @@ import com.agroinventario.domain.service.InventarioDomainService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -30,6 +32,7 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
     private final InventarioDomainService inventarioDomainService;
     private final ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase;
     private final RegistrarAuditoriaUseCase registrarAuditoriaUseCase;
+    private final HistoricoInventarioRepositoryPort historicoInventarioRepository;
 
     public RegistrarMovimientoInventarioUseCaseImpl(
             ProductoRepositoryPort productoRepository,
@@ -38,7 +41,8 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
             CurrentUserPort currentUserPort,
             InventarioDomainService inventarioDomainService,
             ProcesarAlertasProductoUseCase procesarAlertasProductoUseCase,
-            RegistrarAuditoriaUseCase registrarAuditoriaUseCase) {
+            RegistrarAuditoriaUseCase registrarAuditoriaUseCase,
+            HistoricoInventarioRepositoryPort historicoInventarioRepository) {
         this.productoRepository = productoRepository;
         this.movimientoRepository = movimientoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -46,6 +50,7 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
         this.inventarioDomainService = inventarioDomainService;
         this.procesarAlertasProductoUseCase = procesarAlertasProductoUseCase;
         this.registrarAuditoriaUseCase = registrarAuditoriaUseCase;
+        this.historicoInventarioRepository = historicoInventarioRepository;
     }
 
     @Override
@@ -80,6 +85,13 @@ public class RegistrarMovimientoInventarioUseCaseImpl implements RegistrarMovimi
         );
 
         MovimientoInventario guardado = movimientoRepository.save(movimiento);
+        historicoInventarioRepository.aplicarMovimientoDelDia(
+                producto.id(),
+                LocalDate.now(),
+                tipoMovimiento,
+                cantidad,
+                nuevoStock
+        );
         procesarAlertasProductoUseCase.ejecutar(productoActualizado);
 
         registrarAuditoriaUseCase.ejecutar(

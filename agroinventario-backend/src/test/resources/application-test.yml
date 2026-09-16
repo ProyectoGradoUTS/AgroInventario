@@ -20,3 +20,10 @@ spring:
     init:
       mode: always
       data-locations: classpath:data-test.sql
+
+app:
+  ia:
+    provider: none
+    api-key: ""
+    model: gpt-4o-mini
+    timeout-ms: 1000

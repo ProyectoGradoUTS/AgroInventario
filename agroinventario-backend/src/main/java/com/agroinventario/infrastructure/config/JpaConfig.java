@@ -12,7 +12,7 @@ import javax.sql.DataSource;
  * Los repositorios Spring Data se habilitarán en Fase 2.
  */
 @Configuration
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass = true)
 @ConditionalOnBean(DataSource.class)
 @EnableJpaRepositories(basePackages = "com.agroinventario.infrastructure.adapters.output.persistence")
 public class JpaConfig {

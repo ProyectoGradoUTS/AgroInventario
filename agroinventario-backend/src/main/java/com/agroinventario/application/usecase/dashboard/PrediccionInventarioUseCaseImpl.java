@@ -1,181 +1,88 @@
 package com.agroinventario.application.usecase.dashboard;
 
 import com.agroinventario.application.dto.response.PrediccionProductoResponse;
-import com.agroinventario.application.service.predictive.DatasetSinteticoPrediccionService;
-import com.agroinventario.domain.model.HistoricoInventarioResumen;
-import com.agroinventario.domain.model.Producto;
+import com.agroinventario.application.service.predictive.ProyeccionInventarioService;
+import com.agroinventario.domain.model.ProyeccionInventario;
 import com.agroinventario.domain.ports.input.dashboard.PrediccionInventarioUseCase;
-import com.agroinventario.domain.ports.output.HistoricoInventarioRepositoryPort;
-import com.agroinventario.domain.ports.output.MovimientoInventarioRepositoryPort;
+import com.agroinventario.domain.ports.output.PrediccionInventarioPersistenciaPort;
 import com.agroinventario.domain.ports.output.ProductoRepositoryPort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class PrediccionInventarioUseCaseImpl implements PrediccionInventarioUseCase {
 
     private final ProductoRepositoryPort productoRepository;
-    private final MovimientoInventarioRepositoryPort movimientoRepository;
-    private final HistoricoInventarioRepositoryPort historicoRepository;
-    private final DatasetSinteticoPrediccionService datasetSinteticoPrediccionService;
+    private final ProyeccionInventarioService proyeccionInventarioService;
+    private final PrediccionInventarioPersistenciaPort prediccionPersistenciaPort;
 
     public PrediccionInventarioUseCaseImpl(
             ProductoRepositoryPort productoRepository,
-            MovimientoInventarioRepositoryPort movimientoRepository,
-            HistoricoInventarioRepositoryPort historicoRepository,
-            DatasetSinteticoPrediccionService datasetSinteticoPrediccionService) {
+            ProyeccionInventarioService proyeccionInventarioService,
+            PrediccionInventarioPersistenciaPort prediccionPersistenciaPort) {
         this.productoRepository = productoRepository;
-        this.movimientoRepository = movimientoRepository;
-        this.historicoRepository = historicoRepository;
-        this.datasetSinteticoPrediccionService = datasetSinteticoPrediccionService;
+        this.proyeccionInventarioService = proyeccionInventarioService;
+        this.prediccionPersistenciaPort = prediccionPersistenciaPort;
     }
 
     @Override
     public List<PrediccionProductoResponse> ejecutar() {
-        return productoRepository.findAll().stream()
-                .map(this::toPrediccion)
-                .sorted(Comparator.comparingLong(PrediccionProductoResponse::diasHastaAgotamiento).thenComparing(PrediccionProductoResponse::nombre))
+        List<ProyeccionInventario> proyecciones = proyeccionInventarioService
+                .proyectarTodos(productoRepository.findAll())
+                .stream()
+                .sorted(Comparator.comparingLong(ProyeccionInventario::diasHastaAgotamiento)
+                        .thenComparing(ProyeccionInventario::nombre))
                 .toList();
+
+        prediccionPersistenciaPort.reemplazarPrediccionesDelDia(proyecciones);
+        prediccionPersistenciaPort.registrarEjecucionModelo(
+                proyecciones.size(),
+                (int) proyecciones.stream().mapToLong(ProyeccionInventario::diasObservados).sum(),
+                proyeccionInventarioService.inicioVentana(),
+                LocalDate.now(),
+                mae(proyecciones),
+                rmse(proyecciones)
+        );
+
+        return proyecciones.stream().map(this::toResponse).toList();
     }
 
-    private PrediccionProductoResponse toPrediccion(Producto producto) {
-        HistoricoInventarioResumen resumenHistorico = historicoRepository
-                .resumirProducto(producto.id(), 90)
-                .orElse(null);
-        double consumoPromedio = calcularConsumoPromedio(producto, resumenHistorico);
-        int leadTimeDias = leadTimeDias(producto);
-        long diasHastaAgotamiento = producto.stockActual() <= 0 ? 0 : Math.max(0, Math.round((double) producto.stockActual() / Math.max(consumoPromedio, 0.5)));
-        LocalDate fechaProyectadaAgotamiento = diasHastaAgotamiento == 0 ? LocalDate.now() : LocalDate.now().plusDays(diasHastaAgotamiento);
-        double demanda7d = consumoPromedio * 7;
-        double demanda30d = consumoPromedio * 30;
-        int cantidadSugerida = Math.max(0, (int) Math.ceil((consumoPromedio * leadTimeDias) + producto.stockMinimo() - producto.stockActual()));
-
-        String estrategia = seleccionarEstrategia(producto, consumoPromedio, leadTimeDias, diasHastaAgotamiento, cantidadSugerida);
-        String riesgo = seleccionarRiesgo(
-                producto,
-                diasHastaAgotamiento,
-                consumoPromedio,
-                leadTimeDias,
-                resumenHistorico
-        );
-        String mensaje = construirMensaje(producto, diasHastaAgotamiento, cantidadSugerida, estrategia, riesgo);
-
+    private PrediccionProductoResponse toResponse(ProyeccionInventario p) {
         return new PrediccionProductoResponse(
-                producto.id(),
-                producto.nombre(),
-                producto.categoriaNombre() == null ? "Sin categoría" : producto.categoriaNombre(),
-                producto.stockActual(),
-                producto.stockMinimo(),
-                redondear(consumoPromedio),
-                leadTimeDias,
-                diasHastaAgotamiento,
-                fechaProyectadaAgotamiento,
-                redondear(demanda7d),
-                redondear(demanda30d),
-                cantidadSugerida,
-                estrategia,
-                riesgo,
-                mensaje
+                p.productoId(),
+                p.nombre(),
+                p.categoria(),
+                p.stockActual(),
+                p.stockMinimo(),
+                p.consumoPromedio(),
+                p.leadTimeDias(),
+                p.diasHastaAgotamiento(),
+                p.fechaProyectadaAgotamiento(),
+                p.demandaProyectada7d(),
+                p.demandaProyectada30d(),
+                p.cantidadSugerida(),
+                p.estrategia(),
+                p.riesgo(),
+                p.mensaje(),
+                p.nivelConfianza(),
+                p.fuenteDatos()
         );
     }
 
-    private double calcularConsumoPromedio(
-            Producto producto,
-            HistoricoInventarioResumen resumenHistorico) {
-        if (resumenHistorico != null && resumenHistorico.consumoPromedioDiario() > 0.0) {
-            return consumoConMargenDeVariabilidad(resumenHistorico);
-        }
-
-        if (movimientoRepository.existsByProductoId(producto.id())) {
-            double promedio = movimientoRepository.findByProductoId(producto.id()).stream()
-                    .mapToDouble(m -> Math.abs(m.cantidad()))
-                    .average()
-                    .orElse(0.0);
-            if (promedio > 0.0) {
-                return Math.max(0.2, promedio);
-            }
-        }
-
-        var historicoSintetico = datasetSinteticoPrediccionService.generarParaProducto(producto);
-        return historicoSintetico.stream()
-                .mapToDouble(h -> h.consumoReal())
+    private double mae(List<ProyeccionInventario> proyecciones) {
+        return proyecciones.stream()
+                .mapToDouble(p -> p.desviacionConsumo())
                 .average()
-                .orElse(Math.max(0.3, producto.stockMinimo() / 7.0));
+                .orElse(0);
     }
 
-    private double consumoConMargenDeVariabilidad(HistoricoInventarioResumen resumen) {
-        double promedio = resumen.consumoPromedioDiario();
-        double variabilidad = resumen.desviacionConsumo();
-        return Math.max(0.2, promedio + (variabilidad * 0.5));
-    }
-
-    private int leadTimeDias(Producto producto) {
-        String categoria = producto.categoriaNombre() == null ? "" : producto.categoriaNombre().trim().toLowerCase();
-        return switch (categoria) {
-            case "medicina" -> 8;
-            case "semillas" -> 15;
-            case "toxicológica", "toxicologica" -> 12;
-            case "herbicidas" -> 8;
-            case "insecticidas" -> 10;
-            case "fungicidas" -> 8;
-            case "alimentos" -> 8;
-            default -> 10;
-        };
-    }
-
-    private String seleccionarEstrategia(Producto producto, double consumoPromedio, int leadTimeDias, long diasHastaAgotamiento, int cantidadSugerida) {
-        if (producto.stockActual() <= producto.stockMinimo() || cantidadSugerida > 0 && producto.stockActual() <= (consumoPromedio * leadTimeDias) + producto.stockMinimo()) {
-            return "REPOSICION_MINIMO";
-        }
-        if (diasHastaAgotamiento <= 7) {
-            return "STOCK_BAJO_DEMANDA";
-        }
-        if (cantidadSugerida > 0) {
-            return "TOP_OFF_LEAD_TIME";
-        }
-        return "MONITOREO";
-    }
-
-    private String seleccionarRiesgo(
-            Producto producto,
-            long diasHastaAgotamiento,
-            double consumoPromedio,
-            int leadTimeDias,
-            HistoricoInventarioResumen resumenHistorico) {
-        if (resumenHistorico != null && resumenHistorico.diasStockout() > 0) {
-            return resumenHistorico.diasStockout() >= 7 ? "ALTO" : "MEDIO";
-        }
-        if (producto.stockActual() <= producto.stockMinimo() || diasHastaAgotamiento <= 7) {
-            return "ALTO";
-        }
-        if (producto.stockActual() <= (consumoPromedio * leadTimeDias) + producto.stockMinimo()) {
-            return "MEDIO";
-        }
-        return "BAJO";
-    }
-
-    private String construirMensaje(Producto producto, long diasHastaAgotamiento, int cantidadSugerida, String estrategia, String riesgo) {
-        if ("REPOSICION_MINIMO".equals(estrategia)) {
-            return "Se recomienda reabastecer de inmediato para cubrir el stock mínimo y evitar rupturas.";
-        }
-        if ("STOCK_BAJO_DEMANDA".equals(estrategia)) {
-            return "El consumo proyectado es superior al inventario disponible y requiere una reposición prioritaria.";
-        }
-        if ("TOP_OFF_LEAD_TIME".equals(estrategia)) {
-            return "El producto debe recibir un top-off para cubrir el lead time y mantener la continuidad operativa.";
-        }
-        if ("ALTO".equals(riesgo)) {
-            return "El riesgo es alto; se recomienda seguimiento cercano y revisión de compra.";
-        }
-        return "El producto mantiene una tendencia estable y requiere monitoreo periódico.";
-    }
-
-    private double redondear(double valor) {
-        return Math.round(valor * 100.0) / 100.0;
+    private double rmse(List<ProyeccionInventario> proyecciones) {
+        return Math.sqrt(proyecciones.stream()
+                .mapToDouble(p -> p.desviacionConsumo() * p.desviacionConsumo())
+                .average()
+                .orElse(0));
     }
 }

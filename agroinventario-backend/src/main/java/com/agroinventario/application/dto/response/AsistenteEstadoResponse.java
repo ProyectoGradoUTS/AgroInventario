@@ -6,6 +6,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record AsistenteEstadoResponse(
         @Schema(example = "true") boolean disponible,
         @Schema(example = "Asistente disponible para consultas de inventario y reposición")
-        String mensaje
+        String mensaje,
+        boolean llmActivo,
+        long productosActivos,
+        long stockBajo,
+        long alertasPendientes,
+        long registrosHistoricos
 ) {
 }

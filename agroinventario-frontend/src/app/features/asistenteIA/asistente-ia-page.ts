@@ -1,15 +1,14 @@
-import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, ElementRef, OnInit, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { environment } from '../../../environments/environment';
-import { AsistenteMensajeUi } from '../../core/models';
+import { AsistenteEstadoResponse, AsistenteMensajeUi } from '../../core/models';
 import { AsistenteIaService } from '../../core/services/asistente-ia.service';
+import { extractErrorMessage } from '../../core/utilities/error.util';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
 
 @Component({
@@ -17,13 +16,13 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
   standalone: true,
   imports: [
     DatePipe,
+    DecimalPipe,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatChipsModule,
     PageHeaderComponent,
   ],
   templateUrl: './asistente-ia-page.html',
@@ -32,17 +31,18 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 export class AsistenteIaPage implements OnInit {
   private readonly asistenteService = inject(AsistenteIaService);
   private readonly fb = inject(FormBuilder);
+  private readonly chatThread = viewChild<ElementRef<HTMLDivElement>>('chatThread');
 
   readonly habilitado = this.asistenteService.isEnabled();
-  readonly basePath = environment.asistenteIa.basePath;
   readonly enviando = signal(false);
+  readonly estado = signal<AsistenteEstadoResponse | null>(null);
   readonly mensajes = signal<AsistenteMensajeUi[]>([]);
 
   readonly sugerencias = [
-    '¿Qué productos tienen stock bajo?',
-    'Resumen general del inventario',
-    '¿Qué necesita reposición urgente?',
-    '¿Qué productos vencen pronto?',
+    'Hola, ¿cómo está el inventario?',
+    '¿Qué productos se van a agotar esta semana?',
+    '¿Qué debo pedir para no desabastecerme?',
+    '¿Qué vence pronto y me puede generar pérdidas?',
     '¿Cómo va la categoría de medicina?',
   ];
 
@@ -53,18 +53,35 @@ export class AsistenteIaPage implements OnInit {
   ngOnInit(): void {
     this.mensajes.set([
       {
-        id: 'sys-1',
-        rol: 'sistema',
+        id: 'bienvenida',
+        rol: 'asistente',
         texto: this.habilitado
-          ? 'Asistente habilitado. Las consultas se enviarán al backend.'
-          : 'Módulo preparado. El backend aún no expone el Asistente IA. No se realizan llamadas HTTP.',
+          ? 'Hola, soy el asistente del inventario. Puedo decirle cómo está el stock, qué se va a agotar, qué vence pronto y qué conviene pedir. Pregúnteme como si habláramos.'
+          : 'El asistente no está disponible en este entorno.',
         fecha: new Date().toISOString(),
       },
     ]);
 
     if (!this.habilitado) {
       this.form.disable({ emitEvent: false });
+      return;
     }
+
+    this.asistenteService.obtenerEstado().subscribe({
+      next: (estado) => this.estado.set(estado),
+      error: (error: unknown) => {
+        this.mensajes.update((lista) => [
+          ...lista,
+          {
+            id: 'sys-err',
+            rol: 'sistema',
+            texto: extractErrorMessage(error, 'No pude leer el estado del inventario en este momento.'),
+            fecha: new Date().toISOString(),
+          },
+        ]);
+        this.scrollAlFinal();
+      },
+    });
   }
 
   usarSugerencia(texto: string): void {
@@ -72,6 +89,7 @@ export class AsistenteIaPage implements OnInit {
       return;
     }
     this.form.controls.pregunta.setValue(texto);
+    this.enviar();
   }
 
   enviar(): void {
@@ -85,16 +103,16 @@ export class AsistenteIaPage implements OnInit {
       return;
     }
 
-    const ahora = new Date().toISOString();
     this.mensajes.update((lista) => [
       ...lista,
       {
         id: `u-${Date.now()}`,
         rol: 'usuario',
         texto: pregunta,
-        fecha: ahora,
+        fecha: new Date().toISOString(),
       },
     ]);
+    this.scrollAlFinal();
 
     this.enviando.set(true);
     this.form.controls.pregunta.reset('');
@@ -111,21 +129,33 @@ export class AsistenteIaPage implements OnInit {
             fecha: new Date().toISOString(),
           },
         ]);
+        this.scrollAlFinal();
       },
-      error: (error: { message?: string }) => {
+      error: (error: unknown) => {
         this.enviando.set(false);
         this.mensajes.update((lista) => [
           ...lista,
           {
             id: `e-${Date.now()}`,
-            rol: 'sistema',
-            texto:
-              error?.message ||
-              'No fue posible contactar al asistente. Verifique que el backend esté disponible.',
+            rol: 'asistente',
+            texto: extractErrorMessage(
+              error,
+              'No pude consultar el inventario ahora. Intente de nuevo en un momento.'
+            ),
             fecha: new Date().toISOString(),
           },
         ]);
+        this.scrollAlFinal();
       },
+    });
+  }
+
+  private scrollAlFinal(): void {
+    queueMicrotask(() => {
+      const el = this.chatThread()?.nativeElement;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
     });
   }
 }

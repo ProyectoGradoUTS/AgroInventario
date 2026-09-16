@@ -17,6 +17,8 @@ public record PrediccionProductoResponse(
         int cantidadSugerida,
         String estrategia,
         String riesgo,
-        String mensaje
+        String mensaje,
+        double nivelConfianza,
+        String fuenteDatos
 ) {
 }

@@ -7,6 +7,10 @@ public record DashboardResumenResponse(
         long totalAlertasPendientes,
         long totalProductosCriticos,
         long totalSinMovimiento,
+        long productosAgotamiento7d,
+        long productosVencimiento30d,
+        long recomendacionesUrgentes,
+        double valorEnRiesgoVencimiento,
         List<DashboardProductoResponse> productos
 ) {
 }

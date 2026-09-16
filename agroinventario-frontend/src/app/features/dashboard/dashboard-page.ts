@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +20,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
   standalone: true,
   imports: [
     DatePipe,
+    DecimalPipe,
     RouterLink,
     MatCardModule,
     MatIconModule,
@@ -42,7 +43,8 @@ export class DashboardPage implements OnInit {
 
   readonly alertColumns = ['producto', 'tipo', 'estado', 'fecha'];
   readonly movimientoColumns = ['producto', 'tipo', 'cantidad', 'usuario', 'fecha'];
-  readonly stockColumns = ['nombre', 'categoria', 'stock', 'minimo'];
+  readonly recomendacionColumns = ['nombre', 'stock', 'agotamiento', 'cantidad', 'estrategia'];
+  readonly categoriaColumns = ['categoria', 'total', 'stockBajo', 'criticos', 'consumo', 'nivel'];
 
   ngOnInit(): void {
     this.cargar();
@@ -63,5 +65,15 @@ export class DashboardPage implements OnInit {
           );
         },
       });
+  }
+
+  recomendacionesVisibles(data: DashboardSnapshot) {
+    return data.recomendaciones.slice(0, 8);
+  }
+
+  prediccionesVisibles(data: DashboardSnapshot) {
+    return [...data.predicciones]
+      .sort((a, b) => a.diasHastaAgotamiento - b.diasHastaAgotamiento)
+      .slice(0, 8);
   }
 }

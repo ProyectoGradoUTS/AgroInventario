@@ -1,0 +1,33 @@
+.table-card {
+  border: 1px solid var(--agro-border);
+  box-shadow: none;
+}
+
+.data-table {
+  width: 100%;
+
+  th {
+    font-size: 0.75rem;
+    color: var(--agro-text-muted);
+    font-weight: 600;
+  }
+}
+
+.table-loading,
+.empty {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  color: var(--agro-text-muted);
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--agro-danger);
+}

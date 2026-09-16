@@ -1,6 +1,6 @@
 <app-page-header
   title="Inventario"
-  subtitle="Registrar entradas y salidas · POST /v1/inventario/productos/{id}/movimientos"
+  subtitle="Registrar entradas y salidas de productos activos"
   icon="warehouse"
 >
   <a mat-stroked-button routerLink="/app/movimientos">
@@ -100,7 +100,7 @@
   <mat-card class="panel panel--info">
     <mat-card-header>
       <mat-card-title>Resumen del producto</mat-card-title>
-      <mat-card-subtitle>Datos actuales desde GET /v1/productos</mat-card-subtitle>
+      <mat-card-subtitle>Stock, mínimo y vencimiento del producto seleccionado</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       @if (productoSeleccionado(); as producto) {

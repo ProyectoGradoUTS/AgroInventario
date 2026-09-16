@@ -47,6 +47,10 @@ export interface DashboardResumenData {
   totalAlertasPendientes: number;
   totalProductosCriticos: number;
   totalSinMovimiento: number;
+  productosAgotamiento7d: number;
+  productosVencimiento30d: number;
+  recomendacionesUrgentes: number;
+  valorEnRiesgoVencimiento: number;
   productos: DashboardProductoResumen[];
 }
 
@@ -103,6 +107,8 @@ export interface DashboardPrediccionData {
   estrategia: string;
   riesgo: string;
   mensaje: string;
+  nivelConfianza?: number;
+  fuenteDatos?: string;
 }
 
 export interface DashboardSnapshot {

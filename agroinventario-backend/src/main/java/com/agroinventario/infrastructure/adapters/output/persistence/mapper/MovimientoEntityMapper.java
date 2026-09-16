@@ -13,15 +13,25 @@ public class MovimientoEntityMapper {
         if (entity == null) {
             return null;
         }
+        return toDomain(entity, entity.getProducto(), entity.getUsuario());
+    }
+
+    public MovimientoInventario toDomain(
+            MovimientoInventarioEntity entity,
+            ProductoEntity producto,
+            UsuarioEntity usuario) {
+        if (entity == null) {
+            return null;
+        }
         return new MovimientoInventario(
                 entity.getId(),
-                entity.getProducto().getId(),
-                entity.getProducto().getNombre(),
+                producto.getId(),
+                producto.getNombre(),
                 entity.getTipoMovimiento(),
                 entity.getCantidad(),
                 entity.getDescripcion(),
-                entity.getUsuario().getId(),
-                entity.getUsuario().getNombre(),
+                usuario.getId(),
+                usuario.getNombre(),
                 entity.getFechaMovimiento()
         );
     }
